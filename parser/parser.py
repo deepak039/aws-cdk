@@ -1,0 +1,84 @@
+import os
+
+import aws_cdk as cdk
+from .utils.config_loader import ConfigLoader
+
+from stacks.api_gateway_stack import ApiGatewayStack
+from  stacks.lambda_stack import LambdaStack
+from  stacks.vpc import VpcStack
+from  stacks.security_groups import SecurityGroupStack
+from  stacks.vpc_endpoints import  VpcEndpoint
+from  stacks.public_route_table import  PublicRoute
+from  stacks.private_route_table import  PrivateRoute
+from constructs import Construct
+import yaml
+
+class Parser:
+
+    def __init__(self,app : Construct):
+         self.resources = {}
+         self.app = app
+         self.function = {
+            'lambdas' : self.createLambda,
+            'api_gateways' : self.createApiGateway,
+            'vpcs' : self.createVpc,
+            'security_groups' : self.createSecurityGroups,
+            'vpc_endpoints' : self.createVpcEndpoints
+         }
+    
+        
+
+
+    def createVpcEndpoints(self,config):
+        vpc_endpoint = VpcEndpoint(scope = self.app,vpc=self.resources[config['vpc']].vpc,config=config)
+        return vpc_endpoint
+
+    def createSecurityGroups(self,config):
+        
+        sec_group = SecurityGroupStack(scope = self.app,vpc = self.resources[config['service']].vpc,config = config)
+        return sec_group
+
+    def createVpc(self,config):
+        
+        vpc_obj = VpcStack(scope = self.app,config = config)
+        public_route_table = PublicRoute(scope = self.app,vpc = vpc_obj.vpc,config = config)
+        private_route_table = PrivateRoute(scope = self.app,vpc = vpc_obj.vpc,config = config)
+        return vpc_obj
+    
+    def createLambda(self,config):
+        lambda_func = LambdaStack(scope = self.app,vpc = self.resources[config['vpc']].vpc,security_group = self.resources[config['security_group']].sg,config = config)
+        return lambda_func
+        
+    
+    def createApiGateway(self,config : dict):
+        
+        if config['name'] not in self.resources:
+            gateway = ApiGatewayStack(scope = self.app,lambda_stack = self.resources[config['lambdaname']],config = config)
+            gateway.createEndpoints(self.resources[config['lambdaname']],config['routes'])
+            return gateway
+        else:
+            self.resources[config['name']].createEndpoints(self.resources[config['lambdaname']],config['routes'])
+            return self.resources[config['name']]
+
+
+
+
+
+    def run(self):
+        script_dir = os.path.dirname(os.path.abspath(__file__))
+        base_path = os.path.dirname(script_dir)
+        file_path = os.path.join(base_path,"parser",'utils','config.yaml')
+        config = ConfigLoader.load_config(file_path)
+        
+        for key,val in config.items():
+            
+            for instance in config[key]:
+                inst_obj = self.function[key](config = instance)
+                self.resources[instance['name']] = inst_obj
+
+
+
+
+
+
+
