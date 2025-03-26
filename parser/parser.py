@@ -12,6 +12,8 @@ from  stacks.public_route_table import  PublicRoute
 from  stacks.private_route_table import  PrivateRoute
 from  stacks.dynamodb_stack import DynamoDBStack
 from  stacks.rds_stack import RDSStack
+from stacks.ec2_stack import Ec2Stack
+from stacks.asg_stack import ASGStack
 from constructs import Construct
 import yaml
 
@@ -27,7 +29,9 @@ class Parser:
             'security_groups' : self.createSecurityGroups,
             'vpc_endpoints' : self.createVpcEndpoints,
             'dynamodb_tables': self.createDynamoDBTable,
-            'rds_instances': self.createRDSInstance
+            'rds_instances': self.createRDSInstance,
+            'ec2':self.createEc2,
+            'asg':self.createAsg
          }
     
         
@@ -48,6 +52,13 @@ class Parser:
         public_route_table = PublicRoute(scope = self.app,vpc = vpc_obj.vpc,config = config)
         private_route_table = PrivateRoute(scope = self.app,vpc = vpc_obj.vpc,config = config)
         return vpc_obj
+    def createEc2(self,config):
+        ec2Instance = Ec2Stack(scope = self.app,vpc = self.resources[config['vpc']].vpc,security_group = self.resources[config['security_group']].sg,config = config)
+        return ec2Instance   
+    
+    def createAsg(self,config):
+        asgg = ASGStack(scope = self.app,vpc = self.resources[config['vpc']].vpc,config = config)
+        return asgg   
     
     def createLambda(self,config):
         lambda_func = LambdaStack(scope = self.app,vpc = self.resources[config['vpc']].vpc,security_group = self.resources[config['security_group']].sg,config = config)

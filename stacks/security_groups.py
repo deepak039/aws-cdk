@@ -10,9 +10,9 @@ class SecurityGroupStack(Stack):
         self.sg = SecurityGroup(
           self,
           f"{config['name']}",
-          vpc=vpc,  # Explicitly pass the VPC here (ensure no duplicate vpc in `config`)
-          description=config.get("description"),  # Safe access via .get()
-          allow_all_outbound=config.get("allow_all_outbound")      # Default true if not provided
+          vpc=vpc,  
+          description=config.get("description"),  
+          allow_all_outbound=config.get("allow_all_outbound")      
         )
     
         for rule in config["ingress_rules"]:
