@@ -10,6 +10,8 @@ from  stacks.security_groups import SecurityGroupStack
 from  stacks.vpc_endpoints import  VpcEndpoint
 from  stacks.public_route_table import  PublicRoute
 from  stacks.private_route_table import  PrivateRoute
+from  stacks.dynamodb_stack import DynamoDBStack
+from  stacks.rds_stack import RDSStack
 from constructs import Construct
 import yaml
 
@@ -23,7 +25,9 @@ class Parser:
             'api_gateways' : self.createApiGateway,
             'vpcs' : self.createVpc,
             'security_groups' : self.createSecurityGroups,
-            'vpc_endpoints' : self.createVpcEndpoints
+            'vpc_endpoints' : self.createVpcEndpoints,
+            'dynamodb_tables': self.createDynamoDBTable,
+            'rds_instances': self.createRDSInstance
          }
     
         
@@ -60,7 +64,18 @@ class Parser:
             self.resources[config['name']].createEndpoints(self.resources[config['lambdaname']],config['routes'])
             return self.resources[config['name']]
 
+    def createDynamoDBTable(self, config):
+        dynamo_db_stack = DynamoDBStack(scope=self.app, config=config)
+        return dynamo_db_stack
 
+    def createRDSInstance(self, config):
+        rds_stack = RDSStack(
+            scope=self.app, 
+            vpc=self.resources[config['vpc']].vpc, 
+            security_group=self.resources[config['security_group']].sg, 
+            config=config
+        )
+        return rds_stack
 
 
 
