@@ -1,4 +1,4 @@
-from aws_cdk import Stack
+from aws_cdk import Stack, RemovalPolicy
 from aws_cdk.aws_dynamodb import Table, AttributeType, BillingMode
 from constructs import Construct
 
@@ -24,3 +24,4 @@ class DynamoDBStack(Stack):
             write_capacity=config.get("write_capacity", 5) if config["billing_mode"] == "PROVISIONED" else None,
             point_in_time_recovery=config.get("enable_point_in_time_recovery", False)  # Enable Point-in-Time Recovery if specified
         )
+        self.table.apply_removal_policy(RemovalPolicy.DESTROY)
