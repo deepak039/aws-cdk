@@ -34,8 +34,8 @@ class ASGStack(Stack):
             ],
         )
 
-        user_data_path = config.get("path")
-        user_data_script = self._load_user_data(user_data_path)
+        # user_data_path = config.get("path")
+        # user_data_script = self._load_user_data(user_data_path)
 
         # Auto Scaling Group
         self.asg = autoscaling.AutoScalingGroup(
@@ -52,8 +52,8 @@ class ASGStack(Stack):
             ),
             
         )
-        if user_data_script:
-            asg.add_user_data(user_data_script)
+        # if user_data_script:
+        #     asg.add_user_data(user_data_script)
 
         # User data (optional): Install Node.js app on instance start
         # asg.add_user_data("""
@@ -71,7 +71,7 @@ class ASGStack(Stack):
         """Load the user data script from the given file path."""
         if not path or not os.path.exists(path):
             raise FileNotFoundError(f"User data script not found at path: {path}")
-        with open(path, 'r') as file:
+        # with open(path, 'r') as file:
             return file.read()    
        
 
