@@ -1,3 +1,8 @@
+
+
+  
+
+          
 vpcs:
  - name : "main-v"
    cidr: "10.0.0.0/16"
@@ -58,7 +63,16 @@ alb:
     asg: myasg
 
 
-
+dynamodb:
+  name: MyDynamoDBStack
+  table_name: MyDynamoDBTable
+  partition_key: id
+  sort_key:
+    name: created_at
+    type: STRING
+  read_capacity: 5
+  write_capacity: 5
+  grant_permissions_to_ec2: true  # YAML uses lowercase "true" for booleans
 
   
 
