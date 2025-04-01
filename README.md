@@ -37,6 +37,12 @@ Once the virtualenv is activated, you can install the required dependencies.
 $ pip install -r requirements.txt
 ```
 
+Once you have installed the requirements.txt file, you can install yaml
+
+```
+$ pip install pyyaml
+```
+
 At this point you can now synthesize the CloudFormation template for this code.
 
 ```
