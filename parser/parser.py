@@ -45,8 +45,8 @@ class Parser:
     def createVpc(self,config):
         
         vpc_obj = VpcStack(scope = self.app,config = config)
-        public_route_table = PublicRoute(scope = self.app,vpc = vpc_obj.vpc,config = config)
-        private_route_table = PrivateRoute(scope = self.app,vpc = vpc_obj.vpc,config = config)
+        # public_route_table = PublicRoute(scope = self.app,vpc = vpc_obj.vpc,config = config)
+        # private_route_table = PrivateRoute(scope = self.app,vpc = vpc_obj.vpc,config = config)
         return vpc_obj
     def createEc2(self,config):
         ec2Instance = Ec2Stack(scope = self.app,vpc = self.resources[config['vpc']].vpc,security_group = self.resources[config['security_group']].sg,config = config)
