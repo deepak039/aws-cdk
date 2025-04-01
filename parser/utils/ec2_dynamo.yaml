@@ -1,8 +1,3 @@
-
-
-  
-
-          
 vpcs:
  - name : "main-v"
    cidr: "10.0.0.0/16"
@@ -23,26 +18,6 @@ security_groups:
       - cidr: "10.0.0.0/16"
         description: "Allow all traffic within VPC"
         port: "ALL_TRAFFIC"
-# vpc_endpoints:
-#   - service : dynamodb
-#     name : "TestEndpoint"
-#     vpc : "main-vpc"
-#     subnets:
-#       - "PRIVATE_WITH_EGRESS"
-# lambdas:
-#   - name: lambda1
-#     file_type : 'zip'
-#     code: "lambda1"
-#     vpc : 'main-vpc'
-#     security_group : "sec-group-1"
-#     handler : "handler.handler"
-#     runtime: "python_3_8"
-# api_gateways:
-#   - name: apigateway1
-#     lambdaname: lambda1
-#     routes:
-#       - path: "/route1"
-#         method: "GET"
 ec2:
   - name: myinstance
     vpc : 'main-v'
@@ -62,17 +37,16 @@ alb:
     vpc : 'main-v'
     asg: myasg
 
-
 dynamodb:
-  name: MyDynamoDBStack
-  table_name: MyDynamoDBTable
-  partition_key: id
-  sort_key:
-    name: created_at
-    type: STRING
-  read_capacity: 5
-  write_capacity: 5
-  grant_permissions_to_ec2: true  # YAML uses lowercase "true" for booleans
+  - name: "TestTable"
+    partition_key:
+      name: "pk"
+      type: "string"
+    sort_key:
+      name: "sk"
+      type: "string"
+    billing_mode: "PAY_PER_REQUEST"
+    enable_point_in_time_recovery: true
 
   
 

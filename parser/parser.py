@@ -10,7 +10,7 @@ from  stacks.security_groups import SecurityGroupStack
 from  stacks.vpc_endpoints import  VpcEndpoint
 from  stacks.public_route_table import  PublicRoute
 from  stacks.private_route_table import  PrivateRoute
-from  stacks.dynamoDB_stack import DynamoDBStack
+from  stacks.dynamodb_stack import DynamoDBStack
 from  stacks.rds_stack import RDSStack
 from stacks.ec2_stack import Ec2Stack
 from stacks.asg_stack import ASGStack
@@ -20,8 +20,9 @@ import yaml
 
 class Parser:
 
-    def __init__(self,app : Construct):
+    def __init__(self,app : Construct,configName : str):
          self.resources = {}
+         self.configName = configName
          self.app = app
          self.function = {
             'lambdas' : self.createLambda,
@@ -29,7 +30,7 @@ class Parser:
             'vpcs' : self.createVpc,
             'security_groups' : self.createSecurityGroups,
             'vpc_endpoints' : self.createVpcEndpoints,
-            'dynamodb_tables': self.createDynamoDBTable,
+            'dynamodb': self.createDynamoDBTable,
             'rds_instances': self.createRDSInstance,
             'ec2':self.createEc2,
             'asg':self.createAsg,
@@ -98,7 +99,7 @@ class Parser:
     def run(self):
         script_dir = os.path.dirname(os.path.abspath(__file__))
         base_path = os.path.dirname(script_dir)
-        file_path = os.path.join(base_path,"parser",'utils','config1.yaml')
+        file_path = os.path.join(base_path,"parser",'utils',self.configName)
         config = ConfigLoader.load_config(file_path)
         
         for key,val in config.items():
