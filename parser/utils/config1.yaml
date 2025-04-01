@@ -1,7 +1,7 @@
 vpcs:
- - name : "main-vpc"
+ - name : "main-v"
    cidr: "10.0.0.0/16"
-   max_azs: 1
+   max_azs: 2
    subnets:
     - name: "public"
       type: "PUBLIC"
@@ -12,43 +12,52 @@ vpcs:
 security_groups:
   - name: "sec-group-1"
     description: "Default VPC security group"
-    service : "main-vpc"
+    service : "main-v"
     allow_all_outbound: true
     ingress_rules:
       - cidr: "10.0.0.0/16"
         description: "Allow all traffic within VPC"
         port: "ALL_TRAFFIC"
-vpc_endpoints:
-  - service : dynamodb
-    name : "TestEndpoint"
-    vpc : "main-vpc"
-    subnets:
-      - "PRIVATE_WITH_EGRESS"
-lambdas:
-  - name: lambda1
-    file_type : 'zip'
-    code: "lambda1"
-    vpc : 'main-vpc'
-    security_group : "sec-group-1"
-    handler : "handler.handler"
-    runtime: "python_3_8"
-api_gateways:
-  - name: apigateway1
-    lambdaname: lambda1
-    routes:
-      - path: "/route1"
-        method: "GET"
+# vpc_endpoints:
+#   - service : dynamodb
+#     name : "TestEndpoint"
+#     vpc : "main-vpc"
+#     subnets:
+#       - "PRIVATE_WITH_EGRESS"
+# lambdas:
+#   - name: lambda1
+#     file_type : 'zip'
+#     code: "lambda1"
+#     vpc : 'main-vpc'
+#     security_group : "sec-group-1"
+#     handler : "handler.handler"
+#     runtime: "python_3_8"
+# api_gateways:
+#   - name: apigateway1
+#     lambdaname: lambda1
+#     routes:
+#       - path: "/route1"
+#         method: "GET"
 ec2:
   - name: myinstance
-    vpc : 'main-vpc'
+    vpc : 'main-v'
+    user_data_path : 'code-app.sh'
     security_group : "sec-group-1"
 
 asg:
   - name: myasg
-    vpc : 'main-vpc'
+    vpc : 'main-v'
+    user_data_path : 'code-app.sh'
     max: 3
     min: 1 
     
+
+alb:
+  - name: myalb
+    vpc : 'main-v'
+    asg: myasg
+
+
 
 
   
