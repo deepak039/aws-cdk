@@ -64,5 +64,7 @@ command.
  * `cdk deploy`      deploy this stack to your default AWS account/region
  * `cdk diff`        compare deployed stack with current state
  * `cdk docs`        open CDK documentation
-
+ * `cdk deploy -c config="<your-config-file-name>.yaml" --all`   deploy particular yaml config file
+ * `cdk destroy -c config="<your-config-file-name>.yaml" --all`  destroy particular yaml config file
+   
 Enjoy!
