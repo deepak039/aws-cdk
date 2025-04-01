@@ -4,57 +4,39 @@ from aws_cdk import (
     aws_autoscaling as autoscaling,
     aws_elasticloadbalancingv2 as elbv2,
     aws_iam as iam,
+    CfnOutput,
 )
 from constructs import Construct
 
 class ALBStack(Stack):
-    def __init__(self, scope: Construct,config:dict,vpc,asg, **kwargs) -> None:
-        super().__init__(scope, id, **kwargs)
-
-        # Lookup VPC
-       
-
-        # IAM Role for EC2 instances
-        # role = iam.Role(
-        #     self, "ASGInstanceRole",
-        #     assumed_by=iam.ServicePrincipal("ec2.amazonaws.com"),
-        #     managed_policies=[
-        #         iam.ManagedPolicy.from_aws_managed_policy_name("AmazonSSMManagedInstanceCore"),
-        #     ]
-        # )
-
-     
-
-        # User data (optional): Install Node.js app on instance start
-        # asg.add_user_data("""
-        #     #!/bin/bash
-        #     yum update -y
-        #     curl -sL https://rpm.nodesource.com/setup_16.x | bash -
-        #     yum install nodejs -y
-        #     echo 'const http = require("http"); const server = http.createServer((req, res) => { res.writeHead(200, {"Content-Type": "text/plain"}); res.end("Hello from Node.js"); }); server.listen(3000);' > /home/ec2-user/app.js
-        #     node /home/ec2-user/app.js &
-        # """)
+    def __init__(self, scope: Construct, config: dict, vpc=None, asg=None, **kwargs):
+        super().__init__(scope, config["name"], **kwargs)
+        self.name = config["name"]
 
         # Create an ALB
-        alb = elbv2.ApplicationLoadBalancer(
+        self.alb = elbv2.ApplicationLoadBalancer(
             self, "NodeJsLoadBalancer",
             vpc=vpc,
-            internet_facing=True
+            internet_facing=True,
+             vpc_subnets=ec2.SubnetSelection(
+        subnet_type=ec2.SubnetType.PUBLIC ),
         )
 
-        listener = alb.add_listener(
+        self.listener = self.alb.add_listener(
             "Listener",
             port=80,
-            open=True
+            open=True,
         )
 
         # Add ASG instances as targets to the ALB
-        listener.add_targets(
+        self.listener.add_targets(
+            
             "ApplicationFleet",
-            port=3000,
-            targets=[asg]
+            port=8080,  # App running on port 8080
+            targets=[asg],
+            protocol=elbv2.ApplicationProtocol.HTTP,
+           
         )
 
         # Output the Load Balancer DNS name
-        from aws_cdk import CfnOutput
-        CfnOutput(self, "LoadBalancerDNS", value=alb.load_balancer_dns_name)
+        CfnOutput(self, "LoadBalancerDNS", value=self.alb.load_balancer_dns_name)

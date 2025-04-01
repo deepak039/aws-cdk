@@ -7,7 +7,9 @@ from parser.parser import Parser
 
 
 app = cdk.App()
-parser = Parser(app = app)
+config = app.node.try_get_context("config")
+print(config)
+parser = Parser(app = app,configName = config)
 parser.run()
 
 

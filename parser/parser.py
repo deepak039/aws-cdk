@@ -10,15 +10,19 @@ from  stacks.security_groups import SecurityGroupStack
 from  stacks.vpc_endpoints import  VpcEndpoint
 from  stacks.public_route_table import  PublicRoute
 from  stacks.private_route_table import  PrivateRoute
+from  stacks.dynamodb_stack import DynamoDBStack
+from  stacks.rds_stack import RDSStack
 from stacks.ec2_stack import Ec2Stack
 from stacks.asg_stack import ASGStack
+from stacks.alb_stack import ALBStack
 from constructs import Construct
 import yaml
 
 class Parser:
 
-    def __init__(self,app : Construct):
+    def __init__(self,app : Construct,configName : str):
          self.resources = {}
+         self.configName = configName
          self.app = app
          self.function = {
             'lambdas' : self.createLambda,
@@ -26,8 +30,11 @@ class Parser:
             'vpcs' : self.createVpc,
             'security_groups' : self.createSecurityGroups,
             'vpc_endpoints' : self.createVpcEndpoints,
+            'dynamodb': self.createDynamoDBTable,
+            'rds_instances': self.createRDSInstance,
             'ec2':self.createEc2,
-            'asg':self.createAsg
+            'asg':self.createAsg,
+            'alb':self.createAlb,
          }
     
         
@@ -56,6 +63,10 @@ class Parser:
         asgg = ASGStack(scope = self.app,vpc = self.resources[config['vpc']].vpc,config = config)
         return asgg   
     
+    def createAlb(self,config):
+        alb=ALBStack(scope = self.app,vpc = self.resources[config['vpc']].vpc, asg=self.resources[config['asg']].asg,config = config)
+        return alb
+    
     def createLambda(self,config):
         lambda_func = LambdaStack(scope = self.app,vpc = self.resources[config['vpc']].vpc,security_group = self.resources[config['security_group']].sg,config = config)
         return lambda_func
@@ -71,14 +82,24 @@ class Parser:
             self.resources[config['name']].createEndpoints(self.resources[config['lambdaname']],config['routes'])
             return self.resources[config['name']]
 
+    def createDynamoDBTable(self, config):
+        dynamo_db_stack = DynamoDBStack(scope=self.app, config=config)
+        return dynamo_db_stack
 
+    def createRDSInstance(self, config):
+        rds_stack = RDSStack(
+            scope=self.app, 
+            resources=self.resources, 
+            config=config
+        )
+        return rds_stack
 
 
 
     def run(self):
         script_dir = os.path.dirname(os.path.abspath(__file__))
         base_path = os.path.dirname(script_dir)
-        file_path = os.path.join(base_path,"parser",'utils','config.yaml')
+        file_path = os.path.join(base_path,"parser",'utils',self.configName)
         config = ConfigLoader.load_config(file_path)
         
         for key,val in config.items():

@@ -5,6 +5,7 @@ from aws_cdk import (
     aws_elasticloadbalancingv2 as elbv2,
     aws_iam as iam,
 )
+import os
 from constructs import Construct
 
 class ASGStack(Stack):
@@ -25,6 +26,22 @@ class ASGStack(Stack):
         # )
 
              # IAM Role for EC2 instances
+        current_directory = os.path.dirname(__file__)
+        user_data_path = os.path.join(current_directory, config.get('user_data_path', ''))
+
+        user_data_content = ""
+        
+        if user_data_path:
+            try:
+                # Open the file and read user data content
+                with open(user_data_path, 'r') as f:
+                    user_data_content = f.read()
+            except FileNotFoundError:
+                print(f"Error: '{user_data_path}' file not found.")
+
+        # Create the UserData object and add content
+        user_data = ec2.UserData.for_linux()
+        user_data.add_commands(user_data_content)     
         asg_role = iam.Role(
             self, 
             "ASGInstanceRole",
@@ -34,10 +51,7 @@ class ASGStack(Stack):
             ],
         )
 
-        # user_data_path = config.get("path")
-        # user_data_script = self._load_user_data(user_data_path)
-
-        # Auto Scaling Group
+        
         self.asg = autoscaling.AutoScalingGroup(
             self, config['name'],
               vpc=vpc,  # Specify the VPC where instances should be launched
@@ -50,29 +64,12 @@ class ASGStack(Stack):
             vpc_subnets=ec2.SubnetSelection(
                 subnet_type=ec2.SubnetType.PRIVATE_WITH_EGRESS  # Restrict to private subnets
             ),
+            user_data=user_data,
             
         )
-        # if user_data_script:
-        #     asg.add_user_data(user_data_script)
-
-        # User data (optional): Install Node.js app on instance start
-        # asg.add_user_data("""
-        #     #!/bin/bash
-        #     yum update -y
-        #     curl -sL https://rpm.nodesource.com/setup_16.x | bash -
-        #     yum install nodejs -y
-        #     echo 'const http = require("http"); const server = http.createServer((req, res) => { res.writeHead(200, {"Content-Type": "text/plain"}); res.end("Hello from Node.js"); }); server.listen(3000);' > /home/ec2-user/app.js
-        #     node /home/ec2-user/app.js &
-        # """)
-
-        # Create an ALB
+       
     
-    def _load_user_data(self, path: str) -> str:
-        """Load the user data script from the given file path."""
-        if not path or not os.path.exists(path):
-            raise FileNotFoundError(f"User data script not found at path: {path}")
-        # with open(path, 'r') as file:
-            return file.read()    
+  
        
 
        
