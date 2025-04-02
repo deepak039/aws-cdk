@@ -52,4 +52,21 @@ rds_instances:
     master_username: "admin"
     master_password: "password123"
 
+s3_buckets:
+  - name: "MyS3Bucket"
+    bucket_name: my-configured-s3-bucket
+    versioned: true
+    bucket_key_enabled: true
+    access_control: PRIVATE
+    retain_on_delete: true
+    file_upload:
+      local_path: ./assets  # Path to folder/files to upload into the bucket
+    lifecycle:
+      noncurrent_version_expiration_days: 30  
+    bucket_policy:
+      actions:
+        - s3:GetObject
+        - s3:PutObject
+        - s3:DeleteObject
+
     

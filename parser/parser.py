@@ -15,12 +15,14 @@ from  stacks.rds_stack import RDSStack
 from stacks.ec2_stack import Ec2Stack
 from stacks.asg_stack import ASGStack
 from stacks.alb_stack import ALBStack
+from stacks.s3bucket_stack import S3BucketStack
 from constructs import Construct
 import yaml
 
 class Parser:
 
     def __init__(self,app : Construct,configName : str):
+         print(f"[DEBUG] Received configName: {configName}")
          self.resources = {}
          self.configName = configName
          self.app = app
@@ -35,7 +37,6 @@ class Parser:
             'ec2':self.createEc2,
             'asg':self.createAsg,
             'alb':self.createAlb,
-            'iam_permissions':self.addPermission
          }
     
         
@@ -97,20 +98,50 @@ class Parser:
         )
         return rds_stack
 
+    def createS3Bucket(self, config):
+        required_keys = ["name", "bucket_name", "file_upload"]
+        for key in required_keys:
+            if key not in config:
+                raise KeyError(f"Missing required key '{key}' in S3 bucket configuration. Check your config.yaml: {config}")
 
+        # Validate if file_upload.local_path exists
+        local_path = config["file_upload"]["local_path"]
+        if not os.path.exists(local_path):
+            raise FileNotFoundError(f"Local path '{local_path}' not found for S3 bucket deployment")
+
+        # Create and return the bucket stack
+        s3_bucket_stack = S3BucketStack(
+            scope=self.app,
+            id=config["name"],
+            config=config
+        )
+        return s3_bucket_stack
 
     def run(self):
         script_dir = os.path.dirname(os.path.abspath(__file__))
         base_path = os.path.dirname(script_dir)
-        file_path = os.path.join(base_path,"parser",'utils',self.configName)
+        # If self.configName is already a full path, use it directly
+        if not os.path.isabs(self.configName):
+            file_path = os.path.join(base_path, "parser", "utils", self.configName)
+        else:
+            file_path = self.configName
+
+        # Debugging: Print the resolved file path
+        print(f"Resolved Config Path: {file_path}")
+
+        if not os.path.exists(file_path):
+            raise FileNotFoundError(f"Configuration file not found at: {file_path}")
+        
         config = ConfigLoader.load_config(file_path)
         
-        for key,val in config.items():
-            
+        for key, val in config.items():
+            if key not in self.function:
+                raise KeyError(f"Unsupported resource type '{key}' in config file")
+
             for instance in config[key]:
                 inst_obj = self.function[key](config = instance)
-                if 'name' in instance: 
-                    self.resources[instance['name']] = inst_obj
+                self.resources[instance['name']] = inst_obj
+
 
 
 

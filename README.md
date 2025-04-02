@@ -17,6 +17,10 @@ To manually create a virtualenv on MacOS and Linux:
 ```
 $ python -m venv .venv
 ```
+OR 
+```
+$ python -m venv venv
+```
 
 After the init process completes and the virtualenv is created, you can use the following
 step to activate your virtualenv.
@@ -37,6 +41,12 @@ Once the virtualenv is activated, you can install the required dependencies.
 $ pip install -r requirements.txt
 ```
 
+Once you have installed the requirements.txt file, you can install yaml
+
+```
+$ pip install pyyaml
+```
+
 At this point you can now synthesize the CloudFormation template for this code.
 
 ```
@@ -54,5 +64,7 @@ command.
  * `cdk deploy`      deploy this stack to your default AWS account/region
  * `cdk diff`        compare deployed stack with current state
  * `cdk docs`        open CDK documentation
-
+ * `cdk deploy -c config="<your-config-file-name>.yaml" --all`   deploy particular yaml config file
+ * `cdk destroy -c config="<your-config-file-name>.yaml" --all`  destroy particular yaml config file
+   
 Enjoy!
