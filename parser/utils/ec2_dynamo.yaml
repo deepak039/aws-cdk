@@ -18,11 +18,6 @@ security_groups:
       - cidr: "10.0.0.0/16"
         description: "Allow all traffic within VPC"
         port: "ALL_TRAFFIC"
-ec2:
-  - name: myinstance
-    vpc : 'main-v'
-    user_data_path : 'code-app.sh'
-    security_group : "sec-group-1"
 
 asg:
   - name: myasg
@@ -30,8 +25,6 @@ asg:
     user_data_path : 'code-app.sh'
     max: 3
     min: 1 
-    
-
 alb:
   - name: myalb
     vpc : 'main-v'
