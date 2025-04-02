@@ -86,4 +86,14 @@ class LambdaStack(Stack):
         except KeyError:
             raise ValueError(f"Unsupported runtime: {runtime}. Supported runtimes are: {list(runtime_options.keys())}")
 
-    
+    def addPolicy(self,policies):
+        lambda_role = self.my_lambda.role
+        
+        for policy in policies:
+            print(policy)
+            lambda_role.add_to_policy(
+                PolicyStatement(
+                    actions=policy['action'],
+                    resources=["*"]  
+                )
+            )

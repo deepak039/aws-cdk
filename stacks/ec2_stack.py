@@ -13,7 +13,11 @@ class Ec2Stack(Stack):
         # Load user data from a .sh file located in the same directory
         current_directory = os.path.dirname(__file__)
         user_data_path = os.path.join(current_directory, config.get('user_data_path', ''))
-
+        ec2_role = iam.Role(
+            self, 
+            "Ec2Instance",
+            assumed_by=iam.ServicePrincipal("ec2.amazonaws.com"),
+        )
         user_data_content = ""
         
         if user_data_path:
@@ -31,14 +35,25 @@ class Ec2Stack(Stack):
         # Define the EC2 instance
         
         self.instance = ec2.Instance(
-           self, "MyEC2Instance",
+           self, config['name'],
            instance_type=ec2.InstanceType("t2.micro"),  # Choose your instance type
             machine_image=ec2.MachineImage.latest_amazon_linux(),  # Choose your Amazon Machine Image (AMI)
             vpc=vpc,  # Associate with the VPC
             vpc_subnets=ec2.SubnetSelection(subnet_type=ec2.SubnetType.PRIVATE_WITH_EGRESS),  # Specify the subnet
              security_group=security_group,
              user_data=user_data, 
+             role = ec2_role
         
          )
+    
 
-# Example `config` structure for the Ec2Stack
+    def addPolicy(self,config):
+        ec2_role = self.instance.role
+
+        for policy in policies:
+            ec2_role.add_to_policy(
+                PolicyStatement(
+                    actions=policy['action'],
+                    resources=["*"]  
+                )
+            )

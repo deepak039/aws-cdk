@@ -37,11 +37,12 @@ class Parser:
             'ec2':self.createEc2,
             'asg':self.createAsg,
             'alb':self.createAlb,
-            's3_buckets': self.createS3Bucket
          }
     
         
 
+    def addPermission(self,config):
+          self.resources[config['service']].addPolicy(config['policies'])
 
     def createVpcEndpoints(self,config):
         vpc_endpoint = VpcEndpoint(scope = self.app,vpc=self.resources[config['vpc']].vpc,config=config)
@@ -138,7 +139,7 @@ class Parser:
                 raise KeyError(f"Unsupported resource type '{key}' in config file")
 
             for instance in config[key]:
-                inst_obj = self.function[key](config=instance)
+                inst_obj = self.function[key](config = instance)
                 self.resources[instance['name']] = inst_obj
 
 
