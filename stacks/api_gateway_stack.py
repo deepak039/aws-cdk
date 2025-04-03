@@ -47,7 +47,13 @@ class ApiGatewayStack(Stack):
             throttle=ThrottleSettings(
                 rate_limit=10,
                 burst_limit=2
-            )
+            ),
+            api_stages=[
+            {
+            "api": self.api,  
+            "stage": self.api.deployment_stage  
+            }
+            ]
         )
 
         api_key = self.api.add_api_key(key)
