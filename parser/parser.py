@@ -80,10 +80,10 @@ class Parser:
         
         if config['name'] not in self.resources:
             gateway = ApiGatewayStack(scope = self.app,lambda_stack = self.resources[config['lambdaname']],config = config)
-            gateway.createEndpoints(self.resources[config['lambdaname']],config['routes'])
+            gateway.createEndpoints(self.resources[config['lambdaname']],config['routes'],config['key'])
             return gateway
         else:
-            self.resources[config['name']].createEndpoints(self.resources[config['lambdaname']],config['routes'])
+            self.resources[config['name']].createEndpoints(self.resources[config['lambdaname']],config['routes'],config['key'])
             return self.resources[config['name']]
 
     def createDynamoDBTable(self, config):
