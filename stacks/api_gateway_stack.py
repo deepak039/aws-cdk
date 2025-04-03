@@ -1,7 +1,7 @@
 from aws_cdk import Stack
 from constructs import Construct
 
-from aws_cdk.aws_apigateway import RestApi, LambdaIntegration, AuthorizationType,Deployment,Stage
+from aws_cdk.aws_apigateway import RestApi, LambdaIntegration, AuthorizationType,Deployment,Stage,ApiKey,UsagePlan,ThrottleSettings
 from stacks.lambda_stack import LambdaStack
 
 
@@ -30,11 +30,25 @@ class ApiGatewayStack(Stack):
            else:
             return AuthorizationType.NONE   
 
-    def createEndpoints(self,lambda_stack,endpoints):
+    def createEndpoints(self,lambda_stack,endpoints,key):
         for endpoint in endpoints:
     
             resource = self.api.root.add_resource(endpoint["path"].strip("/"))
             resource.add_method(
                 endpoint["method"].upper(),
-                LambdaIntegration(lambda_stack.my_lambda)
+               
+                LambdaIntegration(lambda_stack.my_lambda),
+                 api_key_required=True,
             )
+       
+
+        plan = self.api.add_usage_plan("UsagePlan",
+                name="MyPlan",
+            throttle=ThrottleSettings(
+                rate_limit=10,
+                burst_limit=2
+            )
+        )
+
+        api_key = self.api.add_api_key(key)
+        plan.add_api_key(api_key)

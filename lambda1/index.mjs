@@ -37,7 +37,7 @@ export const handler = async (event,context) => {
 const handlePut = async (event) => {
     try {
         
-        const body = JSON.parse(event.body); 
+        const body = event.body; 
         const { message } = body;
 
         if (!message) {
@@ -51,7 +51,8 @@ const handlePut = async (event) => {
         const params = {
             TableName: TABLE_NAME,
             Item: {
-                id: { S: '1' }, 
+                pk: { S: '1' }, 
+                sk: {S : '1'},
                 message: { S: message }, 
             },
         };
@@ -80,7 +81,8 @@ const handleGet = async () => {
         const params = {
             TableName: TABLE_NAME,
             Key: {
-                id: { S: '1' }, // Static primary key value "1"
+                pk: { S: '1' }, 
+                sk: { S: '1' },// Static primary key value "1"
             },
         };
 
