@@ -159,9 +159,11 @@ alb:
   - name: "web-alb"
     vpc: "web-vpc"
     asg: "web-asg"
+```
 
 Serverless API Stack
 
+```
 dynamodb:
   - name: "users"
     partition_key:
