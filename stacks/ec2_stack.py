@@ -42,9 +42,11 @@ class Ec2Stack(Stack):
             vpc_subnets=ec2.SubnetSelection(subnet_type=ec2.SubnetType.PRIVATE_WITH_EGRESS),  # Specify the subnet
              security_group=security_group,
              user_data=user_data, 
-             role = ec2_role
+             role = ec2_role,
+             instance_monitoring=ec2.Monitoring.DETAILED # import aws_cdk.aws_ec2 as ec2
         
          )
+
     
 
     def addPolicy(self,config):
