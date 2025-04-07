@@ -82,7 +82,7 @@ class MergeConfig:
         user_config = ConfigLoader.load_config(user_config_path)
         default_config = ConfigLoader.load_config(default_config_path)
 
-        # Log detailed configurations (can be commented out in production to improve efficiency)
+        # Log detailed configurations
         print("\n=== Detailed Configuration of user_config ===")
         MergeConfig.print_config_details(user_config, "user_config")
         print("\n=== Detailed Configuration of default_config ===")
@@ -91,7 +91,7 @@ class MergeConfig:
         # Perform merging
         merged_config = MergeConfig.merge_config(default_config, user_config)
 
-        # Log merged configuration (can be commented out in production to improve efficiency)
+        # Log merged configuration
         print("\n=== Detailed Configuration of merged_config ===")
         MergeConfig.print_config_details(merged_config, "merged_config")
 
