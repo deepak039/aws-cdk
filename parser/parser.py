@@ -37,6 +37,7 @@ class Parser:
             'ec2':self.createEc2,
             'asg':self.createAsg,
             'alb':self.createAlb,
+            'iam_permissions' : self.addPermission
          }
     
         
