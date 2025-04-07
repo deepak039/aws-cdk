@@ -18,7 +18,8 @@ pip install pyyaml
 3. Deploy
 
 ```
-cdk deploy -c config=your-config.yaml --all
+cdk deploy -c config="your-config.yaml"
+cdk destroy -c config="your-config.yaml"
 ```
 
 📚 Service Configuration Guide
