@@ -10,7 +10,7 @@ app = cdk.App()
 config = app.node.try_get_context("config")
 print(config)
 parser = Parser(app = app,configName = config)
-parser.run()
+# parser.run()
 
 
 app.synth()
