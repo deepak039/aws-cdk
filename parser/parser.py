@@ -100,14 +100,14 @@ class Parser:
 
     def createS3Bucket(self, config):
         required_keys = ["name", "bucket_name", "file_upload"]
-        for key in required_keys:
-            if key not in config:
-                raise KeyError(f"Missing required key '{key}' in S3 bucket configuration. Check your config.yaml: {config}")
+        # for key in required_keys:
+        #     if key not in config:
+        #         raise KeyError(f"Missing required key '{key}' in S3 bucket configuration. Check your config.yaml: {config}")
 
-        # Validate if file_upload.local_path exists
-        local_path = config["file_upload"]["local_path"]
-        if not os.path.exists(local_path):
-            raise FileNotFoundError(f"Local path '{local_path}' not found for S3 bucket deployment")
+        # # Validate if file_upload.local_path exists
+        # local_path = config["file_upload"]["local_path"]
+        # if not os.path.exists(local_path):
+        #     raise FileNotFoundError(f"Local path '{local_path}' not found for S3 bucket deployment")
 
         # Create and return the bucket stack
         s3_bucket_stack = S3BucketStack(
