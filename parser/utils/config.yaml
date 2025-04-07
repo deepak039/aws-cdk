@@ -39,18 +39,19 @@ lambdas:
 api_gateways:
   - name: apigateway1
     lambdaname: lambda1
+    key : "HelloWorld"
     routes:
       - path: "/route1"
         method: "GET"
 
 
-rds_instances:
-  - name: "TestRDSInstance"
-    security_group: "sec-group-1"
-    engine: "maria_db"          # mysql, postgres, maria_db, oracle-se2
-    database_name: "testdb"
-    master_username: "admin"
-    master_password: "password123"
+# rds_instances:
+#   - name: "TestRDSInstance"
+#     security_group: "sec-group-1"
+#     engine: "maria_db"          # mysql, postgres, maria_db, oracle-se2
+#     database_name: "testdb"
+#     master_username: "admin"
+#     master_password: "password123"
 
 s3_buckets:
   - name: "MyS3Bucket"
