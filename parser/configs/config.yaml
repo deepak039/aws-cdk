@@ -39,6 +39,7 @@ lambdas:
 api_gateways:
   - name: apigateway1
     lambdaname: lambda1
+    key : "HelloWorld"
     routes:
       - path: "/route1"
         method: "GET"

@@ -1,5 +1,6 @@
 import os
 from .utils.config_loader import ConfigLoader
+from .utils.merge_config import MergeConfig
 
 from constructs_cus.api_gateway_stack import ApiGatewayStack
 from constructs_cus.lambda_stack import LambdaStack

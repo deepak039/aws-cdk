@@ -15,7 +15,7 @@ rds:
 
 lambdas:
   - runtime: "python_3_8"
-    handler: "handler.handler"
+    handler: "bye.handler"
     memory_size: 128
     timeout: 3                     # Timeout in seconds
 
