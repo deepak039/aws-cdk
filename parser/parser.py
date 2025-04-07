@@ -1,28 +1,29 @@
 import os
-
-import aws_cdk as cdk
 from .utils.config_loader import ConfigLoader
-from parser.utils.config_loader import ConfigLoader
-from parser.utils.merge_config import MergeConfig
-from stacks.api_gateway_stack import ApiGatewayStack
-from stacks.lambda_stack import LambdaStack
-from stacks.vpc import VpcStack
-from stacks.security_groups import SecurityGroupStack
-from stacks.vpc_endpoints import  VpcEndpoint
-from stacks.public_route_table import  PublicRoute
-from stacks.private_route_table import  PrivateRoute
-from stacks.dynamodb_stack import DynamoDBStack
-from stacks.rds_stack import RDSStack
-from stacks.ec2_stack import Ec2Stack
-from stacks.asg_stack import ASGStack
-from stacks.alb_stack import ALBStack
-from stacks.s3bucket_stack import S3BucketStack
+
+from constructs_cus.api_gateway_stack import ApiGatewayStack
+from constructs_cus.lambda_stack import LambdaStack
+from constructs_cus.vpc import VpcStack
+from constructs_cus.security_groups import SecurityGroupStack
+from constructs_cus.vpc_endpoints import  VpcEndpoint
+from constructs_cus.dynamodb_stack import DynamoDBStack
+from constructs_cus.rds_stack import RDSStack
+from constructs_cus.ec2_stack import Ec2Stack
+from constructs_cus.asg_stack import ASGStack
+from constructs_cus.alb_stack import ALBStack
+from constructs_cus.s3bucket_stack import S3BucketStack
 from constructs import Construct
 import yaml
+from aws_cdk import (
+    Stack,
+    Tags,
+)
 
-class Parser:
+class Parser(Stack):
 
     def __init__(self,app : Construct,configName : str, defaultConfigPath: str):
+         super().__init__(app, "ParserStack")
+         print(f"[DEBUG] Received configName: {configName}")
          self.resources = {}
          self.configName = configName
          self.defaultConfigPath = defaultConfigPath
@@ -38,68 +39,80 @@ class Parser:
             'ec2':self.createEc2,
             'asg':self.createAsg,
             'alb':self.createAlb,
+            's3_buckets': self.createS3Bucket, # Added missing mapping for S3 buckets
+            'iam_permissions': self.addPermission
          }
+         self.run()
+         
     
         
 
     def addPermission(self,config):
+          print(f"[DEBUG] Adding permissions for service: {config['service']}")
           self.resources[config['service']].addPolicy(config['policies'])
 
     def createVpcEndpoints(self,config):
-        vpc_endpoint = VpcEndpoint(scope = self.app,vpc=self.resources[config['vpc']].vpc,config=config)
+        print(f"[DEBUG] Creating VPC Endpoint with config: {config}")
+        vpc_endpoint = VpcEndpoint(scope = self,vpc=self.resources[config['vpc']].vpc,config=config)
         return vpc_endpoint
 
     def createSecurityGroups(self,config):
-        
-        sec_group = SecurityGroupStack(scope = self.app,vpc = self.resources[config['service']].vpc,config = config)
+        print(f"[DEBUG] Creating Security Group with config: {config}")
+        sec_group = SecurityGroupStack(scope = self,vpc = self.resources[config['service']].vpc,config = config)
         return sec_group
 
     def createVpc(self,config):
-        
-        vpc_obj = VpcStack(scope = self.app,config = config)
-        # public_route_table = PublicRoute(scope = self.app,vpc = vpc_obj.vpc,config = config)
-        # private_route_table = PrivateRoute(scope = self.app,vpc = vpc_obj.vpc,config = config)
+        print(f"[DEBUG] Creating VPC with config: {config}")
+        vpc_obj = VpcStack(scope = self,config = config)
         return vpc_obj
+
     def createEc2(self,config):
-        ec2Instance = Ec2Stack(scope = self.app,vpc = self.resources[config['vpc']].vpc,security_group = self.resources[config['security_group']].sg,config = config)
+        print(f"[DEBUG] Creating EC2 instance with config: {config}")
+        ec2Instance = Ec2Stack(scope = self,vpc = self.resources[config['vpc']].vpc,security_group = self.resources[config['security_group']].sg,config = config)
         return ec2Instance   
     
     def createAsg(self,config):
-        asgg = ASGStack(scope = self.app,vpc = self.resources[config['vpc']].vpc,config = config)
+        print(f"[DEBUG] Creating Auto Scaling Group with config: {config}")
+        asgg = ASGStack(scope = self,vpc = self.resources[config['vpc']].vpc,config = config)
         return asgg   
     
     def createAlb(self,config):
-        alb=ALBStack(scope = self.app,vpc = self.resources[config['vpc']].vpc, asg=self.resources[config['asg']].asg,config = config)
+        print(f"[DEBUG] Creating Application Load Balancer with config: {config}")
+        alb=ALBStack(scope = self,vpc = self.resources[config['vpc']].vpc, asg=self.resources[config['asg']].asg,config = config)
         return alb
     
     def createLambda(self,config):
-        lambda_func = LambdaStack(scope = self.app,vpc = self.resources[config['vpc']].vpc,security_group = self.resources[config['security_group']].sg,config = config)
+        print(f"[DEBUG] Creating Lambda function with config: {config}")
+        lambda_func = LambdaStack(scope = self,vpc = self.resources[config['vpc']].vpc,security_group = self.resources[config['security_group']].sg,config = config)
         return lambda_func
         
     
     def createApiGateway(self,config : dict):
-        
+        print(f"[DEBUG] Creating/Updating API Gateway with config: {config}")
         if config['name'] not in self.resources:
-            gateway = ApiGatewayStack(scope = self.app,lambda_stack = self.resources[config['lambdaname']],config = config)
-            gateway.createEndpoints(self.resources[config['lambdaname']],config['routes'])
+            gateway = ApiGatewayStack(scope = self,lambda_stack = self.resources[config['lambdaname']],config = config)
+            gateway.createEndpoints(self.resources[config['lambdaname']],config['routes'],config['key'])
             return gateway
         else:
-            self.resources[config['name']].createEndpoints(self.resources[config['lambdaname']],config['routes'])
+            self.resources[config['name']].createEndpoints(self.resources[config['lambdaname']],config['routes'],config['key'])
             return self.resources[config['name']]
 
     def createDynamoDBTable(self, config):
-        dynamo_db_stack = DynamoDBStack(scope=self.app, config=config)
+        print(f"[DEBUG] Creating DynamoDB table with config: {config}")
+        dynamo_db_stack = DynamoDBStack(scope=self, config=config)
         return dynamo_db_stack
 
     def createRDSInstance(self, config):
+        print(f"[DEBUG] Creating RDS instance with config: {config}")
         rds_stack = RDSStack(
-            scope=self.app, 
+            scope=self, 
             resources=self.resources, 
             config=config
         )
         return rds_stack
 
     def createS3Bucket(self, config):
+        print(f"[DEBUG] Creating S3 bucket with config: {config}")
         required_keys = ["name", "bucket_name", "file_upload"]
         for key in required_keys:
             if key not in config:
@@ -112,13 +125,14 @@ class Parser:
 
         # Create and return the bucket stack
         s3_bucket_stack = S3BucketStack(
-            scope=self.app,
+            scope=self,
             id=config["name"],
             config=config
         )
         return s3_bucket_stack
 
     def run(self):
+        print("[DEBUG] Starting Parser.run()")
         base_dir = os.path.dirname(os.path.abspath(__file__))
 
         user_config_path = self.configName if os.path.isabs(self.configName) else os.path.join(base_dir, "configs", self.configName)
@@ -132,10 +146,13 @@ class Parser:
         # Load and merge configurations
         merged_config = MergeConfig.load_and_merge(user_config_path, default_config_path)
 
+        print(f"[DEBUG] Processing configuration with keys: {list(merged_config.keys())}")
         for key, val in merged_config.items():
             if key not in self.function:
                 raise KeyError(f"Unsupported resource type '{key}' in config file")
             for instance in val:
                 inst_obj = self.function[key](config=instance)
                 self.resources[instance['name']] = inst_obj
+
+        print("[DEBUG] Parser.run() completed")
 

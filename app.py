@@ -10,7 +10,7 @@ app = cdk.App()
 config = app.node.try_get_context("config")
 default_config_path = "default_config.yaml"
 parser = Parser(app=app, configName=config, defaultConfigPath=default_config_path)
-parser.run()
+#parser.run()
 
 
 app.synth()
