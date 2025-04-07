@@ -40,7 +40,7 @@ class Parser(Stack):
             'ec2':self.createEc2,
             'asg':self.createAsg,
             'alb':self.createAlb,
-            's3_buckets': self.createS3Bucket, # Added missing mapping for S3 buckets
+            's3_buckets': self.createS3Bucket,
             'iam_permissions': self.addPermission
          }
          self.run()
@@ -120,9 +120,9 @@ class Parser(Stack):
                 raise KeyError(f"Missing required key '{key}' in S3 bucket configuration. Check your config.yaml: {config}")
 
         # Validate if file_upload.local_path exists
-        local_path = config["file_upload"]["local_path"]
-        if not os.path.exists(local_path):
-            raise FileNotFoundError(f"Local path '{local_path}' not found for S3 bucket deployment")
+        # local_path = config["file_upload"]["local_path"]
+        # if not os.path.exists(local_path):
+        #     raise FileNotFoundError(f"Local path '{local_path}' not found for S3 bucket deployment")
 
         # Create and return the bucket stack
         s3_bucket_stack = S3BucketStack(

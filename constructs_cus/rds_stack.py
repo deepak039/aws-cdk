@@ -62,16 +62,16 @@ class RDSStack(Construct):
         """
         engine_map = {
             "mysql": rds.DatabaseInstanceEngine.mysql(
-                version=rds.MysqlEngineVersion.VER_8_0_28
+                version=rds.MysqlEngineVersion.VER_8_0
             ),
             "postgres": rds.DatabaseInstanceEngine.postgres(
-                version=rds.PostgresEngineVersion.VER_13
+                version=rds.PostgresEngineVersion.VER_15_4
             ),
             "maria_db": rds.DatabaseInstanceEngine.maria_db(
-                version=rds.MariaDbEngineVersion.VER_10_5
+                version=rds.MariaDbEngineVersion.VER_10_11
             ),
             "oracle-se2": rds.DatabaseInstanceEngine.oracle_se2(
-                version=rds.OracleEngineVersion.VER_19_0_0_0_2021_07_R1
+                version=rds.OracleEngineVersion.VER_19_0_0_0_2023_10_R1
             ),
         }
         try:

@@ -33,16 +33,16 @@ lambdas:
     handler: "index.handler"
     runtime: "nodejs_18" 
 
-iam_permissions :
-  - service : "lambda1"
-    policies: 
-        - action:
-            - dynamodb:GetItem
-            - dynamodb:PutItem
-            - dynamodb:UpdateItem
-            - dynamodb:DeleteItem
-            - dynamodb:Query
-            - dynamodb:Scan 
+# iam_permissions :
+#   - service : "lambda1"
+#     policies: 
+#         - action:
+#             - dynamodb:GetItem
+#             - dynamodb:PutItem
+#             - dynamodb:UpdateItem
+#             - dynamodb:DeleteItem
+#             - dynamodb:Query
+#             - dynamodb:Scan 
 
 api_gateways:
   - name: apigateway1

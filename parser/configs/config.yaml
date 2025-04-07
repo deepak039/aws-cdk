@@ -45,8 +45,9 @@ api_gateways:
         method: "GET"
 
 
-rds_instances:
+rds:
   - name: "TestRDSInstance"
+    vpc: "main-vpc"
     security_group: "sec-group-1"
     engine: "maria_db"          # mysql, postgres, maria_db, oracle-se2
     database_name: "testdb"
