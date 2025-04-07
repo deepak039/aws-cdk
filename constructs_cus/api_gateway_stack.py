@@ -5,7 +5,7 @@ from aws_cdk.aws_apigateway import RestApi, LambdaIntegration, AuthorizationType
 from stacks.lambda_stack import LambdaStack
 
 
-class ApiGatewayStack(Stack):
+class ApiGatewayStack(Construct):
     def __init__(self, scope: Construct,lambda_stack: LambdaStack,config : dict, **kwargs):
         super().__init__(scope, config['name'], **kwargs)
 

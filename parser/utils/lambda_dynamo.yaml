@@ -47,6 +47,7 @@ iam_permissions :
 api_gateways:
   - name: apigateway1
     lambdaname: lambda1
+    key : "HelloWorld"
     routes:
       - path: "/retrieve"
         method: "GET"
@@ -62,6 +63,7 @@ dynamodb:
       type: "string"
     billing_mode: "PAY_PER_REQUEST"
     enable_point_in_time_recovery: true
+
 
 
 

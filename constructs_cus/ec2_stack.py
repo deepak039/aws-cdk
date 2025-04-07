@@ -1,11 +1,13 @@
 import os
 from aws_cdk import (
     aws_ec2 as ec2,
+    aws_iam as iam,
     Stack
 )
 from constructs import Construct
+from aws_cdk.aws_iam import PolicyStatement
 
-class Ec2Stack(Stack):
+class Ec2Stack(Construct):
     def __init__(self, scope: Construct, config: dict, vpc=None, security_group=None, **kwargs):
         super().__init__(scope, config['name'], **kwargs)
         self.name = config['name']
@@ -33,29 +35,27 @@ class Ec2Stack(Stack):
         user_data.add_commands(user_data_content)
 
         # Define the EC2 instance
-        
         self.instance = ec2.Instance(
-           self, config['name'],
-           instance_type=ec2.InstanceType("t2.micro"),  # Choose your instance type
-            machine_image=ec2.MachineImage.latest_amazon_linux(),  # Choose your Amazon Machine Image (AMI)
-            vpc=vpc,  # Associate with the VPC
-            vpc_subnets=ec2.SubnetSelection(subnet_type=ec2.SubnetType.PRIVATE_WITH_EGRESS),  # Specify the subnet
-             security_group=security_group,
-             user_data=user_data, 
-             role = ec2_role,
-             instance_monitoring=ec2.Monitoring.DETAILED # import aws_cdk.aws_ec2 as ec2
-        
-         )
+            self, 
+            config['name'],
+            instance_type=ec2.InstanceType(config.get('instance_type', 't2.micro')),
+            machine_image=ec2.MachineImage.latest_amazon_linux(),
+            vpc=vpc,
+            vpc_subnets=ec2.SubnetSelection(subnet_type=ec2.SubnetType.PRIVATE_WITH_EGRESS),
+            security_group=security_group,
+            user_data=user_data,
+            role=ec2_role,
+            instance_monitoring=ec2.Monitoring.DETAILED
+        )
 
-    
-
-    def addPolicy(self,config):
+    def addPolicy(self, config):
         ec2_role = self.instance.role
-
-        for policy in policies:
-            ec2_role.add_to_policy(
-                PolicyStatement(
-                    actions=policy['action'],
-                    resources=["*"]  
+        
+        if 'policies' in config:
+            for policy in config['policies']:
+                ec2_role.add_to_policy(
+                    PolicyStatement(
+                        actions=policy['action'],
+                        resources=["*"]
+                    )
                 )
-            )
