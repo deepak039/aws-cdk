@@ -10,6 +10,7 @@ A configuration-driven AWS infrastructure deployment tool. Pick the services you
 python -m venv .venv
 source .venv/bin/activate  # On Windows: .venv\Scripts\activate
 pip install -r requirements.txt
+pip install pyyaml
 ```
 
 2. Create your config.yaml using the service blocks you need
@@ -17,7 +18,8 @@ pip install -r requirements.txt
 3. Deploy
 
 ```
-cdk deploy -c config=your-config.yaml --all
+cdk deploy -c config="your-config.yaml"
+cdk destroy -c config="your-config.yaml"
 ```
 
 📚 Service Configuration Guide

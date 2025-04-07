@@ -1,13 +1,12 @@
 import os
 from .utils.config_loader import ConfigLoader
-
+from .utils.merge_config import MergeConfig
 
 from constructs_cus.api_gateway_stack import ApiGatewayStack
 from constructs_cus.lambda_stack import LambdaStack
 from constructs_cus.vpc import VpcStack
 from constructs_cus.security_groups import SecurityGroupStack
-from constructs_cus.vpc_endpoints import VpcEndpoint
-
+from constructs_cus.vpc_endpoints import  VpcEndpoint
 from constructs_cus.dynamodb_stack import DynamoDBStack
 from constructs_cus.rds_stack import RDSStack
 from constructs_cus.ec2_stack import Ec2Stack
@@ -23,11 +22,12 @@ from aws_cdk import (
 
 class Parser(Stack):
 
-    def __init__(self,app : Construct,configName : str):
+    def __init__(self,app : Construct,configName : str, defaultConfigPath: str):
          super().__init__(app, "ParserStack")
          print(f"[DEBUG] Received configName: {configName}")
          self.resources = {}
          self.configName = configName
+         self.defaultConfigPath = defaultConfigPath
          self.app = app
          self.function = {
             'lambdas' : self.createLambda,
@@ -36,11 +36,11 @@ class Parser(Stack):
             'security_groups' : self.createSecurityGroups,
             'vpc_endpoints' : self.createVpcEndpoints,
             'dynamodb': self.createDynamoDBTable,
-            'rds_instances': self.createRDSInstance,
+            'rds': self.createRDSInstance,
             'ec2':self.createEc2,
             'asg':self.createAsg,
             'alb':self.createAlb,
-            's3_buckets': self.createS3Bucket, # Added missing mapping for S3 buckets
+            's3_buckets': self.createS3Bucket,
             'iam_permissions': self.addPermission
          }
          self.run()
@@ -120,9 +120,9 @@ class Parser(Stack):
                 raise KeyError(f"Missing required key '{key}' in S3 bucket configuration. Check your config.yaml: {config}")
 
         # Validate if file_upload.local_path exists
-        local_path = config["file_upload"]["local_path"]
-        if not os.path.exists(local_path):
-            raise FileNotFoundError(f"Local path '{local_path}' not found for S3 bucket deployment")
+        # local_path = config["file_upload"]["local_path"]
+        # if not os.path.exists(local_path):
+        #     raise FileNotFoundError(f"Local path '{local_path}' not found for S3 bucket deployment")
 
         # Create and return the bucket stack
         s3_bucket_stack = S3BucketStack(
@@ -134,42 +134,26 @@ class Parser(Stack):
 
     def run(self):
         print("[DEBUG] Starting Parser.run()")
-        script_dir = os.path.dirname(os.path.abspath(__file__))
-        base_path = os.path.dirname(script_dir)
-        
-        if not os.path.isabs(self.configName):
-            file_path = os.path.join(base_path, "parser", "utils", self.configName)
-        else:
-            file_path = self.configName
+        base_dir = os.path.dirname(os.path.abspath(__file__))
 
-        print(f"[DEBUG] Resolved Config Path: {file_path}")
+        user_config_path = self.configName if os.path.isabs(self.configName) else os.path.join(base_dir, "configs", self.configName)
+        default_config_path = self.defaultConfigPath if os.path.isabs(self.defaultConfigPath) else os.path.join(base_dir, "configs", self.defaultConfigPath)
 
-        if not os.path.exists(file_path):
-            raise FileNotFoundError(f"Configuration file not found at: {file_path}")
-        
-        print("[DEBUG] Loading configuration file")
-        config = ConfigLoader.load_config(file_path)
-        
-        print(f"[DEBUG] Processing configuration with keys: {list(config.keys())}")
-        for key, val in config.items():
+        if not os.path.exists(user_config_path):
+            raise FileNotFoundError(f"User configuration file not found: {user_config_path}")
+        if not os.path.exists(default_config_path):
+            raise FileNotFoundError(f"Default configuration file not found: {default_config_path}")
+
+        # Load and merge configurations
+        merged_config = MergeConfig.load_and_merge(user_config_path, default_config_path)
+
+        print(f"[DEBUG] Processing configuration with keys: {list(merged_config.keys())}")
+        for key, val in merged_config.items():
             if key not in self.function:
                 raise KeyError(f"Unsupported resource type '{key}' in config file")
+            for instance in val:
+                inst_obj = self.function[key](config=instance)
+                self.resources[instance['name']] = inst_obj
 
-            print(f"[DEBUG] Processing resource type: {key}")
-            for instance in config[key]:
-                print(f"[DEBUG] Creating instance: {instance.get('name', 'unnamed')}")
-                inst_obj = self.function[key](config = instance)
-                if 'name' in instance:
-                    self.resources[instance['name']] = inst_obj
-                    
-                
-        
         print("[DEBUG] Parser.run() completed")
-
-
-
-
-
-
-
 
