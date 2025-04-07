@@ -2,16 +2,17 @@ import os
 
 import aws_cdk as cdk
 from .utils.config_loader import ConfigLoader
-
+from parser.utils.config_loader import ConfigLoader
+from parser.utils.merge_config import MergeConfig
 from stacks.api_gateway_stack import ApiGatewayStack
-from  stacks.lambda_stack import LambdaStack
-from  stacks.vpc import VpcStack
-from  stacks.security_groups import SecurityGroupStack
-from  stacks.vpc_endpoints import  VpcEndpoint
-from  stacks.public_route_table import  PublicRoute
-from  stacks.private_route_table import  PrivateRoute
-from  stacks.dynamodb_stack import DynamoDBStack
-from  stacks.rds_stack import RDSStack
+from stacks.lambda_stack import LambdaStack
+from stacks.vpc import VpcStack
+from stacks.security_groups import SecurityGroupStack
+from stacks.vpc_endpoints import  VpcEndpoint
+from stacks.public_route_table import  PublicRoute
+from stacks.private_route_table import  PrivateRoute
+from stacks.dynamodb_stack import DynamoDBStack
+from stacks.rds_stack import RDSStack
 from stacks.ec2_stack import Ec2Stack
 from stacks.asg_stack import ASGStack
 from stacks.alb_stack import ALBStack
@@ -21,10 +22,10 @@ import yaml
 
 class Parser:
 
-    def __init__(self,app : Construct,configName : str):
-         print(f"[DEBUG] Received configName: {configName}")
+    def __init__(self,app : Construct,configName : str, defaultConfigPath: str):
          self.resources = {}
          self.configName = configName
+         self.defaultConfigPath = defaultConfigPath
          self.app = app
          self.function = {
             'lambdas' : self.createLambda,
@@ -33,7 +34,7 @@ class Parser:
             'security_groups' : self.createSecurityGroups,
             'vpc_endpoints' : self.createVpcEndpoints,
             'dynamodb': self.createDynamoDBTable,
-            'rds_instances': self.createRDSInstance,
+            'rds': self.createRDSInstance,
             'ec2':self.createEc2,
             'asg':self.createAsg,
             'alb':self.createAlb,
@@ -118,34 +119,23 @@ class Parser:
         return s3_bucket_stack
 
     def run(self):
-        script_dir = os.path.dirname(os.path.abspath(__file__))
-        base_path = os.path.dirname(script_dir)
-        # If self.configName is already a full path, use it directly
-        if not os.path.isabs(self.configName):
-            file_path = os.path.join(base_path, "parser", "utils", self.configName)
-        else:
-            file_path = self.configName
+        base_dir = os.path.dirname(os.path.abspath(__file__))
 
-        # Debugging: Print the resolved file path
-        print(f"Resolved Config Path: {file_path}")
+        user_config_path = self.configName if os.path.isabs(self.configName) else os.path.join(base_dir, "configs", self.configName)
+        default_config_path = self.defaultConfigPath if os.path.isabs(self.defaultConfigPath) else os.path.join(base_dir, "configs", self.defaultConfigPath)
 
-        if not os.path.exists(file_path):
-            raise FileNotFoundError(f"Configuration file not found at: {file_path}")
-        
-        config = ConfigLoader.load_config(file_path)
-        
-        for key, val in config.items():
+        if not os.path.exists(user_config_path):
+            raise FileNotFoundError(f"User configuration file not found: {user_config_path}")
+        if not os.path.exists(default_config_path):
+            raise FileNotFoundError(f"Default configuration file not found: {default_config_path}")
+
+        # Load and merge configurations
+        merged_config = MergeConfig.load_and_merge(user_config_path, default_config_path)
+
+        for key, val in merged_config.items():
             if key not in self.function:
                 raise KeyError(f"Unsupported resource type '{key}' in config file")
-
-            for instance in config[key]:
-                inst_obj = self.function[key](config = instance)
+            for instance in val:
+                inst_obj = self.function[key](config=instance)
                 self.resources[instance['name']] = inst_obj
-
-
-
-
-
-
-
 
