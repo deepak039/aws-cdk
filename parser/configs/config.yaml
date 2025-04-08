@@ -45,13 +45,14 @@ api_gateways:
         method: "GET"
 
 
-rds_instances:
-  - name: "TestRDSInstance"
-    security_group: "sec-group-1"
-    engine: "maria_db"          # mysql, postgres, maria_db, oracle-se2
-    database_name: "testdb"
-    master_username: "admin"
-    master_password: "password123"
+# rds:
+#   - name: "TestRDSInstance"
+#     vpc: "main-vpc"
+#     security_group: "sec-group-1"
+#     engine: "maria_db"          # mysql, postgres, maria_db, oracle-se2
+#     database_name: "testdb"
+#     master_username: "admin"
+#     master_password: "password123"
 
 s3_buckets:
   - name: "MyS3Bucket"

@@ -8,9 +8,9 @@ from parser.parser import Parser
 
 app = cdk.App()
 config = app.node.try_get_context("config")
-print(config)
-parser = Parser(app = app,configName = config)
-# parser.run()
+default_config_path = "default_config.yaml"
+parser = Parser(app=app, configName=config, defaultConfigPath=default_config_path)
+#parser.run()
 
 
 app.synth()

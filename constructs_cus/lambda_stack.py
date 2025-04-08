@@ -9,7 +9,7 @@ from aws_cdk.aws_lambda import Function, Runtime, Code
 from aws_cdk.aws_iam import Role, ServicePrincipal, ManagedPolicy,PolicyStatement
 from dependencies.lambda_functions import addDynamoDBRole 
 class LambdaStack(Construct):
-    def __init__(self, scope: Construct,config:dict,vpc = None,security_group = None, **kwargs):
+    def __init__(self, scope: Construct,config:dict,permissions : dict,vpc = None,security_group = None, **kwargs):
         super().__init__(scope, config['name'], **kwargs)
         self.name = config['name']
         print(vpc,security_group)
@@ -40,6 +40,16 @@ class LambdaStack(Construct):
                 resources=["*"]  
             )
         )
+        print(permissions)
+        if 'policy' in config:
+            for policy_name in config['policy']:
+                for policy in permissions[policy_name].policies:
+
+                    self.lambda_role.add_to_policy(
+                        policy
+                    )
+
+
         code = ''
 
         if config['file_type'] == 'zip':
@@ -86,14 +96,11 @@ class LambdaStack(Construct):
         except KeyError:
             raise ValueError(f"Unsupported runtime: {runtime}. Supported runtimes are: {list(runtime_options.keys())}")
 
-    def addPolicy(self,policies):
-        lambda_role = self.my_lambda.role
+    # def addPolicy(self,policies):
+    #     lambda_role = self.my_lambda.role
         
-        for policy in policies:
-            print(policy)
-            lambda_role.add_to_policy(
-                PolicyStatement(
-                    actions=policy['action'],
-                    resources=["*"]  
-                )
-            )
+    #     for policy in policies:
+    #         print(policy)
+    #         lambda_role.add_to_policy(
+    #             policy
+    #         )

@@ -1,0 +1,65 @@
+vpcs:
+  - name: "main-vpc"
+    cidr: "10.0.0.0/16"
+    max_azs: 2
+
+security_groups:
+  - name: "sec-group-1"
+    service: "main-vpc"
+    ingress_rules:
+      - cidr: "10.0.0.0/16"
+        description: "Allow all traffic within VPC"
+        port: "ALL_TRAFFIC"
+
+lambdas:
+  - name: lambda1
+    file_type: 'zip'
+    code: "lambda1"
+    vpc: 'main-vpc'
+    security_group: "sec-group-1"
+
+
+api_gateways:
+  - name: apigateway1
+    lambdaname: lambda1
+    key : "HelloWorld"
+    routes:
+      - path: "/route1"
+        method: "GET"
+
+
+rds:
+  - name: "TestRDSInstance1"
+    vpc: "main-vpc"
+    security_group: "sec-group-1"
+    engine: "mysql"          # mysql, postgres, maria_db, oracle-se2
+    database_name: "testdb"
+    master_username: "admin1"
+    master_password: "password123"
+  # - name: "TestRDSInstance2"
+  #   vpc: "main-vpc"
+  #   security_group: "sec-group-1"
+  #   engine: "postgres"          # mysql, postgres, maria_db, oracle-se2
+  #   database_name: "testdb2"
+  #   master_username: "deepak2"
+  #   master_password: "password123"
+  #   cloudwatch_logs_exports:
+  #     - postgresql
+  #     - upgrade
+  # - name: "TestRDSInstance3"
+  #   vpc: "main-vpc"
+  #   security_group: "sec-group-1"
+  #   engine: "maria_db"          # mysql, postgres, maria_db, oracle-se2
+  #   database_name: "testdb3"
+  #   master_username: "admin3"
+  #   master_password: "password123"
+  # - name: "TestRDSInstance4"
+  #   vpc: "main-vpc"
+  #   security_group: "sec-group-1"
+  #   instance_type: "m5.large"
+  #   engine: "oracle-se2"          # mysql, postgres, maria_db, oracle-se2
+  #   database_name: "testdb4"
+  #   master_username: "admin4"
+  #   master_password: "password123"
+  #   cloudwatch_logs_exports:
+    
