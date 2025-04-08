@@ -45,14 +45,14 @@ api_gateways:
         method: "GET"
 
 
-rds:
-  - name: "TestRDSInstance"
-    vpc: "main-vpc"
-    security_group: "sec-group-1"
-    engine: "maria_db"          # mysql, postgres, maria_db, oracle-se2
-    database_name: "testdb"
-    master_username: "admin"
-    master_password: "password123"
+# rds:
+#   - name: "TestRDSInstance"
+#     vpc: "main-vpc"
+#     security_group: "sec-group-1"
+#     engine: "maria_db"          # mysql, postgres, maria_db, oracle-se2
+#     database_name: "testdb"
+#     master_username: "admin"
+#     master_password: "password123"
 
 s3_buckets:
   - name: "MyS3Bucket"
@@ -61,8 +61,8 @@ s3_buckets:
     bucket_key_enabled: true
     access_control: PRIVATE
     retain_on_delete: true
-    file_upload:
-      local_path: ./assets  # Path to folder/files to upload into the bucket
+    # file_upload:
+    #   local_path: ./assets  # Path to folder/files to upload into the bucket
     lifecycle:
       noncurrent_version_expiration_days: 30  
     bucket_policy:

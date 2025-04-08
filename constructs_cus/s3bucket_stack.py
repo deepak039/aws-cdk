@@ -50,13 +50,13 @@ class S3BucketStack(Construct):
         )
         s3_bucket.add_to_resource_policy(bucket_policy)
 
-        # Deploy initial content into the bucket
-        BucketDeployment(
-            self,
-            "SampleFileDeployment",
-            sources=[Source.asset(config["file_upload"]["local_path"])],
-            destination_bucket=s3_bucket
-        )
+        # # Deploy initial content into the bucket
+        # BucketDeployment(
+        #     self,
+        #     "SampleFileDeployment",
+        #     sources=[Source.asset(config["file_upload"]["local_path"])],
+        #     destination_bucket=s3_bucket
+        # )
 
         # Output bucket information
         CfnOutput(self, "BucketArn", value=s3_bucket.bucket_arn, description="The ARN of the created S3 bucket")
