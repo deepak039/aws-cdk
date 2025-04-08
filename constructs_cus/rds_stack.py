@@ -54,6 +54,8 @@ class RDSStack(Construct):
             subnet_group=self.subnet_group,
             removal_policy=removal_policy_map.get(config["removal_policy"].upper(), RemovalPolicy.DESTROY),
             cloudwatch_logs_exports=config["cloudwatch_logs_exports"],
+            license_model=rds.LicenseModel.LICENSE_INCLUDED if config["engine"].lower().startswith("oracle") else None,
+
         )
 
     def _resolve_db_engine(self, engine: str):
@@ -65,7 +67,7 @@ class RDSStack(Construct):
                 version=rds.MysqlEngineVersion.VER_8_0
             ),
             "postgres": rds.DatabaseInstanceEngine.postgres(
-                version=rds.PostgresEngineVersion.VER_13
+                version=rds.PostgresEngineVersion.VER_15_10
             ),
             "maria_db": rds.DatabaseInstanceEngine.maria_db(
                 version=rds.MariaDbEngineVersion.VER_10_11
