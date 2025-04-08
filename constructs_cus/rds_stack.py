@@ -14,7 +14,7 @@ class RDSStack(Construct):
 
         self.name = config["name"]
         # Retrieve the default VPC from resources
-        vpc = resources[config["vpc"]].vpc
+        vpc = resources['vpcs'][config["vpc"]].vpc
 
         # Map removal policies for lifecycle
         removal_policy_map = {
@@ -40,7 +40,7 @@ class RDSStack(Construct):
             instance_type=ec2.InstanceType(config["instance_type"]),
             allocated_storage=config["allocated_storage"],
             vpc=vpc,
-            security_groups=[resources[config["security_group"]].sg],
+            security_groups=[resources['security_groups'][config["security_group"]].sg],
             database_name=config.get("database_name"),
             backup_retention=Duration.days(config["backup_retention_days"]),
             deletion_protection=config["deletion_protection"],
