@@ -1,0 +1,25 @@
+vpcs:
+  - cidr: "10.0.0.0/16"
+    name: "main-vpc"
+    max_azs: 2
+    subnets:
+      - name: "public"
+        type: "PUBLIC"
+        cidr_mask: 24
+      - name: "private"
+        type: "PRIVATE_WITH_EGRESS"
+        cidr_mask: 24
+
+
+eks:
+  - name: "my-eks-cluster"
+    vpc: "main-vpc"  # Reference to your VPC name
+    version: "1.27"  # Kubernetes version
+    instance_type: "t3.medium"
+    default_capacity: 2
+    node_groups:
+      - name: "app-nodes"
+        instance_type: "t3.large"
+        min_size: 2
+        max_size: 5
+        desired_size: 3

@@ -47,3 +47,9 @@ vpcs:
 security_groups:
   - description: "Default VPC security group"
     allow_all_outbound: true
+
+eks:
+  - version: "1.27"
+    instance_type: "t3.medium"
+    default_capacity: 2
+    

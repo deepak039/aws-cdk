@@ -14,6 +14,8 @@ from constructs_cus.ec2_stack import Ec2Stack
 from constructs_cus.asg_stack import ASGStack
 from constructs_cus.alb_stack import ALBStack
 from constructs_cus.s3bucket_stack import S3BucketStack
+from constructs_cus.eks_stack import EksStack
+
 from constructs import Construct
 import yaml
 from aws_cdk import (
@@ -42,13 +44,14 @@ class Parser(Stack):
             'asg':self.createAsg,
             'alb':self.createAlb,
             's3_buckets': self.createS3Bucket,
-            'iam_permissions': self.addPolicy
+            'iam_permissions': self.addPolicy,
+            'eks': self.createEksCluster
          }
          self.run()
          
     
         
-
+    
     def addPolicy(self,config):
           print(f"[DEBUG] Creating policies : {config['name']}")
           policy_stack = PolicyStack(scope=self, config=config)
@@ -78,6 +81,11 @@ class Parser(Stack):
         print(f"[DEBUG] Creating Auto Scaling Group with config: {config}")
         asgg = ASGStack(scope = self,vpc = self.resources['vpc'][config['vpc']].vpc,config = config)
         return asgg   
+    
+    def createEksCluster(self, config):
+        print(f"[DEBUG] Creating EKS cluster with config: {config}")
+        eks = EksStack(scope = self, vpc = self.resources['vpcs'][config['vpc']].vpc, config = config)
+        return eks
     
     def createAlb(self,config):
         print(f"[DEBUG] Creating Application Load Balancer with config: {config}")
