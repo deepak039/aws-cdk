@@ -65,7 +65,7 @@ class RDSStack(Construct):
                 version=rds.MysqlEngineVersion.VER_8_0
             ),
             "postgres": rds.DatabaseInstanceEngine.postgres(
-                version=rds.PostgresEngineVersion.VER_15_4
+                version=rds.PostgresEngineVersion.VER_13
             ),
             "maria_db": rds.DatabaseInstanceEngine.maria_db(
                 version=rds.MariaDbEngineVersion.VER_10_11

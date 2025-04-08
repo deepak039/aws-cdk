@@ -44,14 +44,14 @@ rds:
     security_group: "sec-group-1"
     engine: "postgres"          # mysql, postgres, maria_db, oracle-se2
     database_name: "testdb"
-    master_username: "admin"
+    master_username: "deepak"
     master_password: "password123"
   - name: "TestRDSInstance2"
     vpc: "main-vpc"
     security_group: "sec-group-1"
-    engine: "maria_db"          # mysql, postgres, maria_db, oracle-se2
+    engine: "oracle-se2"          # mysql, postgres, maria_db, oracle-se2
     database_name: "testdb2"
-    master_username: "admin2"
+    master_username: "deepak2"
     master_password: "password123"
 
     
