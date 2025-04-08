@@ -125,9 +125,9 @@ class Parser(Stack):
     def createS3Bucket(self, config):
         print(f"[DEBUG] Creating S3 bucket with config: {config}")
         required_keys = ["name", "bucket_name", "file_upload"]
-        for key in required_keys:
-            if key not in config:
-                raise KeyError(f"Missing required key '{key}' in S3 bucket configuration. Check your config.yaml: {config}")
+        # for key in required_keys:
+        #     if key not in config:
+        #         raise KeyError(f"Missing required key '{key}' in S3 bucket configuration. Check your config.yaml: {config}")
 
         # Validate if file_upload.local_path exists
         # local_path = config["file_upload"]["local_path"]
