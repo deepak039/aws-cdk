@@ -45,16 +45,16 @@ This deployment framework supports:
 ```
 
   (b) Windows:  
-  ```
+```
     > python -m venv .venv  
     > .venv\Scripts\activate
 ```
 
 3. Install Dependencies
-   ```
+```
   $ pip install -r requirements.txt  
   $ pip install pyyaml aws-cdk.lambda-layer-kubectl-v28
-  ```
+```
 
 
 5. Install and Configure AWS CDK
@@ -74,7 +74,7 @@ This deployment framework supports:
 8. To clean up and delete resources when needed
 ```
   $ cdk destroy -c config=config.yaml
-  ```
+```
 
 ─────────────────────────
 📚 Configuration Reference
@@ -83,8 +83,9 @@ This deployment framework supports:
 ► VPC & Subnets – Easy Networking Setup  
 Define a Virtual Private Cloud along with subnets:
 
-```
+
 -----------------------------------------------------
+```
 vpcs:
   - name: "main-vpc"              # Required: VPC name
     cidr: "10.0.0.0/16"           # Required: CIDR range
@@ -118,8 +119,7 @@ security_groups:
         port: 80
         cidr: "0.0.0.0/0"
         description: "Allow HTTP traffic from anywhere"
-
- ```       
+```       
 
 ► VPC Endpoints – Private Connectivity  
 Access AWS services privately using VPC endpoints:
@@ -131,7 +131,7 @@ vpc_endpoints:
     vpc: "main-vpc"
     subnets:
       - "PRIVATE_WITH_EGRESS"             # Use one or more subnet types
- ```       
+```       
 
 ► EC2 Instances – Virtual Machines  
 Launch customizable compute instances:
