@@ -38,14 +38,28 @@ class Ec2Stack(Construct):
         self.instance = ec2.Instance(
             self, 
             config['name'],
-            instance_type=ec2.InstanceType(config.get('instance_type', 't2.micro')),
+            instance_type=ec2.InstanceType(config.get('instance_type', 't2.micro')), # Example: 't2.micro', 't2.small', 't3.medium'
             machine_image=ec2.MachineImage.latest_amazon_linux(),
             vpc=vpc,
             vpc_subnets=ec2.SubnetSelection(subnet_type=ec2.SubnetType.PRIVATE_WITH_EGRESS),
             security_group=security_group,
             user_data=user_data,
             role=ec2_role,
-            instance_monitoring=ec2.Monitoring.DETAILED
+            instance_monitoring=ec2.Monitoring.DETAILED,
+            key_name=config.get('key_name', None),  # Example: 'my-key-pair'
+            block_devices=[
+                ec2.BlockDevice(
+                    device_name="/dev/xvda",
+                    volume=ec2.BlockDeviceVolume.ebs(
+                        volume_size=config.get('volume_size', 8),  # Example: 20 for 20GB
+                        volume_type=ec2.EbsDeviceVolumeType(config.get('volume_type', 'gp3')),  # Example: 'gp2', 'gp3', 'io1'
+                        iops=config.get('iops', None),  # Example: 3000 for io1/io2 volumes
+                    )
+                )
+            ],
+            availability_zone=config.get('availability_zone', None),  # Example: 'us-east-1a'
+            disable_api_termination=config.get('termination_protection', False),  # Example: True to enable termination protection
+            instance_name=config.get('instance_name', config['name'])  # Example: 'my-instance'
         )
 
     def addPolicy(self, config):

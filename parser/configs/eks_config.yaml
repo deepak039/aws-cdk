@@ -13,6 +13,9 @@ vpcs:
 
 eks:
   - name: "my-eks-cluster"
+    admin_roles:
+      - arn: arn:aws:iam::533267104533:user/testuser
+      
     vpc: "main-vpc"  # Reference to your VPC name
     version: "1.27"  # Kubernetes version
     instance_type: "t3.medium"
