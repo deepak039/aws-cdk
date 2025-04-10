@@ -9,23 +9,11 @@ import os
 from constructs import Construct
 
 class ASGStack(Construct):
-    def __init__(self, scope: Construct,config:dict,vpc = None, **kwargs) :
+    def __init__(self, scope: Construct,config:dict,permissions : dict,vpc = None, **kwargs) :
         super().__init__(scope,config['name'],  **kwargs)
         self.name = config['name']
 
-        # Lookup VPC
-       
-
-        # IAM Role for EC2 instances
-        # role = iam.Role(
-        #     self, "ASGInstanceRole",
-        #     assumed_by=iam.ServicePrincipal("ec2.amazonaws.com"),
-        #     managed_policies=[
-        #         iam.ManagedPolicy.from_aws_managed_policy_name("AmazonSSMManagedInstanceCore"),
-        #     ]
-        # )
-
-             # IAM Role for EC2 instances
+        
         current_directory = os.path.dirname(__file__)
         user_data_path = os.path.join(current_directory, config.get('user_data_path', ''))
 
@@ -33,7 +21,7 @@ class ASGStack(Construct):
         
         if user_data_path:
             try:
-                # Open the file and read user data content
+               
                 with open(user_data_path, 'r') as f:
                     user_data_content = f.read()
             except FileNotFoundError:
@@ -50,6 +38,15 @@ class ASGStack(Construct):
                 iam.ManagedPolicy.from_aws_managed_policy_name("AmazonSSMManagedInstanceCore")
             ],
         )
+
+        print(permissions)
+        if 'policy' in config:
+            for policy_name in config['policy']:
+                for policy in permissions[policy_name].policies:
+
+                    asg_role.add_to_policy(
+                        policy
+                    )
 
         
         self.asg = autoscaling.AutoScalingGroup(

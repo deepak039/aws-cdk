@@ -1,4 +1,72 @@
 
+"""
+LambdaStack Class
+----------------
+A CDK construct that creates an AWS Lambda function with associated IAM role and permissions.
+
+Parameters:
+    scope (Construct): The parent construct
+    config (dict): Configuration for the Lambda function with structure:
+        {
+            "name": "function-name",
+            "runtime": "python_3_9", # See supported runtimes below
+            "handler": "index.handler",
+            "code": "./path/to/code",
+            "file_type": "zip",
+            "policy": ["policy1", "policy2"] # Optional policies to attach
+        }
+    permissions (dict): IAM permissions to attach to Lambda role
+    vpc (ec2.Vpc): Optional VPC to deploy Lambda into 
+    security_group (ec2.SecurityGroup): Optional security group for Lambda
+    **kwargs: Additional arguments passed to parent construct
+
+Example YAML Configuration:
+--------------------------
+lambda_function:
+  name: my-lambda-function
+  runtime: python_3_9  
+  handler: index.handler
+  code: ./src/lambda
+  file_type: zip
+  policy:
+    - dynamodb_access
+    - s3_access
+
+permissions:
+  dynamodb_access:
+    policies:
+      - Effect: Allow
+        Action:
+          - dynamodb:GetItem
+          - dynamodb:PutItem
+        Resource: "*"
+  s3_access: 
+    policies:
+      - Effect: Allow
+        Action:
+          - s3:GetObject
+          - s3:PutObject
+        Resource: "*"
+
+vpc:
+  name: my-vpc
+  cidr: 10.0.0.0/16
+
+security_groups:
+  - name: lambda-sg
+    description: Security group for Lambda function
+    vpc: my-vpc
+    
+Supported Runtimes:
+------------------
+- nodejs_20, nodejs_18, nodejs_16, nodejs_14, nodejs_12
+- python_3_9, python_3_8, python_3_7
+- java_11, java_8
+- dotnet_6, dotnet_5
+- ruby_3_2, ruby_2_7
+- go_1_x
+"""
+
 from aws_cdk import (
     Stack,
    
@@ -96,11 +164,3 @@ class LambdaStack(Construct):
         except KeyError:
             raise ValueError(f"Unsupported runtime: {runtime}. Supported runtimes are: {list(runtime_options.keys())}")
 
-    # def addPolicy(self,policies):
-    #     lambda_role = self.my_lambda.role
-        
-    #     for policy in policies:
-    #         print(policy)
-    #         lambda_role.add_to_policy(
-    #             policy
-    #         )
