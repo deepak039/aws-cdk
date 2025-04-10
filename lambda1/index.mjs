@@ -1,7 +1,7 @@
 import { DynamoDBClient, PutItemCommand, GetItemCommand } from '@aws-sdk/client-dynamodb';
 
 
-const dynamoClient = new DynamoDBClient({ region: 'ap-south-1' });
+const dynamoClient = new DynamoDBClient({ region: 'us-east-1' });
 
 
 const TABLE_NAME = "TestTable";
@@ -37,7 +37,7 @@ export const handler = async (event,context) => {
 const handlePut = async (event) => {
     try {
         
-        const body = event.body; 
+        const body = JSON.parse(event.body); 
         const { message } = body;
 
         if (!message) {
