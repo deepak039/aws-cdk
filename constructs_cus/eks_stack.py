@@ -44,7 +44,6 @@ class EksStack(Construct):
             cluster_name=config['name'],
             vpc=vpc,
             vpc_subnets=[{"subnet_type": ec2.SubnetType.PRIVATE_WITH_EGRESS}],
-            # version=eks.KubernetesVersion.of(config.get('version', 'auto')),
             default_capacity=config.get('default_capacity', 2),
             default_capacity_instance=ec2.InstanceType(config.get('instance_type', 't3.medium')),
             role=cluster_role,
