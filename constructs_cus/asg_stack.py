@@ -13,19 +13,7 @@ class ASGStack(Construct):
         super().__init__(scope,config['name'],  **kwargs)
         self.name = config['name']
 
-        # Lookup VPC
-       
-
-        # IAM Role for EC2 instances
-        # role = iam.Role(
-        #     self, "ASGInstanceRole",
-        #     assumed_by=iam.ServicePrincipal("ec2.amazonaws.com"),
-        #     managed_policies=[
-        #         iam.ManagedPolicy.from_aws_managed_policy_name("AmazonSSMManagedInstanceCore"),
-        #     ]
-        # )
-
-             # IAM Role for EC2 instances
+        
         current_directory = os.path.dirname(__file__)
         user_data_path = os.path.join(current_directory, config.get('user_data_path', ''))
 
@@ -33,7 +21,7 @@ class ASGStack(Construct):
         
         if user_data_path:
             try:
-                # Open the file and read user data content
+               
                 with open(user_data_path, 'r') as f:
                     user_data_content = f.read()
             except FileNotFoundError:
