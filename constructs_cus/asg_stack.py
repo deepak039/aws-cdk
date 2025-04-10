@@ -9,7 +9,7 @@ import os
 from constructs import Construct
 
 class ASGStack(Construct):
-    def __init__(self, scope: Construct,config:dict,vpc = None, **kwargs) :
+    def __init__(self, scope: Construct,config:dict,permissions : dict,vpc = None, **kwargs) :
         super().__init__(scope,config['name'],  **kwargs)
         self.name = config['name']
 
@@ -38,6 +38,15 @@ class ASGStack(Construct):
                 iam.ManagedPolicy.from_aws_managed_policy_name("AmazonSSMManagedInstanceCore")
             ],
         )
+
+        print(permissions)
+        if 'policy' in config:
+            for policy_name in config['policy']:
+                for policy in permissions[policy_name].policies:
+
+                    asg_role.add_to_policy(
+                        policy
+                    )
 
         
         self.asg = autoscaling.AutoScalingGroup(
