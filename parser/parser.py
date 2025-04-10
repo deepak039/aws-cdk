@@ -74,12 +74,12 @@ class Parser(Stack):
 
     def createEc2(self,config):
         print(f"[DEBUG] Creating EC2 instance with config: {config}")
-        ec2Instance = Ec2Stack(scope = self,vpc = self.resources['vpcs'][config['vpc']].vpc,security_group = self.resources['security_groups'][config['security_group']].sg,config = config)
+        ec2Instance = Ec2Stack(scope = self,vpc = self.resources['vpcs'][config['vpc']].vpc,security_group = self.resources['security_groups'][config['security_group']].sg,config = config,permissions = self.resources['iam_permissions'])
         return ec2Instance   
     
     def createAsg(self,config):
         print(f"[DEBUG] Creating Auto Scaling Group with config: {config}")
-        asgg = ASGStack(scope = self,vpc = self.resources['vpc'][config['vpc']].vpc,config = config)
+        asgg = ASGStack(scope = self,vpc = self.resources['vpcs'][config['vpc']].vpc,config = config,permissions = self.resources['iam_permissions'])
         return asgg   
     
     def createEksCluster(self, config):

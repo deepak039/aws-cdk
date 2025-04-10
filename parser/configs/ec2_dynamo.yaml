@@ -1,7 +1,7 @@
 vpcs:
  - name : "main-v"
    cidr: "10.0.0.0/16"
-   max_azs: 2
+   max_azs: 2    
 security_groups:
   - name: "sec-group-1"
     service : "main-v"
@@ -9,13 +9,19 @@ security_groups:
       - cidr: "10.0.0.0/16"
         description: "Allow all traffic within VPC"
         port: "ALL_TRAFFIC"
-
+vpc_endpoints:
+  - service: dynamodb
+    name: "TestEndpoint"
+    vpc: "main-v"
+    subnets:
+      - "PRIVATE_WITH_EGRESS"
 asg:
   - name: myasg
     vpc : 'main-v'
     user_data_path : 'code-app.sh'
     max: 3
     min: 1 
+
 alb:
   - name: myalb
     vpc : 'main-v'
