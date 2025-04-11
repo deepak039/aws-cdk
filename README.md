@@ -54,7 +54,6 @@ This deployment framework supports:
 3. Install Dependencies
 ```
   $ pip install -r requirements.txt  
-  $ pip install pyyaml aws-cdk.lambda-layer-kubectl-v28
 ```
 
 
@@ -65,16 +64,16 @@ This deployment framework supports:
   $ aws configure
 ```  
 
-6. Create your config.yaml according to the guides below.
+6. Create your <--your_config-->.yaml according to the guides below.
 
 7. Deploy Your Infrastructure
 ```
-  $ cdk deploy -c config=config.yaml
+  $ cdk deploy -c config=<--your_config-->.yaml
 ```  
 
 8. To clean up and delete resources when needed
 ```
-  $ cdk destroy -c config=config.yaml
+  $ cdk destroy -c config=<--your_config-->.yaml
 ```
 
 ─────────────────────────
