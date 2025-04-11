@@ -1,4 +1,5 @@
 from parser.utils.config_loader import ConfigLoader
+from parser.utils.dependency_resolver import DependencyResolver
 
 class MergeConfig:
     @staticmethod
@@ -83,17 +84,28 @@ class MergeConfig:
         default_config = ConfigLoader.load_config(default_config_path)
 
         # Log detailed configurations
-        print("\n=== Detailed Configuration of user_config ===")
+        # print("\n=== Detailed Configuration of user_config ===")
+        # MergeConfig.print_config_details(user_config, "user_config")
+        # print("\n=== Detailed Configuration of default_config ===")
+        # MergeConfig.print_config_details(default_config, "default_config")
+
+        # Sort the dictionary based on dependency order
+        resolver = DependencyResolver(user_config)
+        sorted_services = resolver.resolve_dependencies()
+        sorted_config = resolver.sort_configuration(user_config, sorted_services)
+        print(sorted_config)
+        user_config = sorted_config
+
+        # Log detailed configurations after dependency resolution
+        print("\n=== Detailed Configuration of user_config after dependency resolution ===")
         MergeConfig.print_config_details(user_config, "user_config")
-        print("\n=== Detailed Configuration of default_config ===")
-        MergeConfig.print_config_details(default_config, "default_config")
 
         # Perform merging
         merged_config = MergeConfig.merge_config(default_config, user_config)
 
         # Log merged configuration
-        print("\n=== Detailed Configuration of merged_config ===")
-        MergeConfig.print_config_details(merged_config, "merged_config")
+        # print("\n=== Detailed Configuration of merged_config ===")
+        # MergeConfig.print_config_details(merged_config, "merged_config")
 
         return merged_config
 
