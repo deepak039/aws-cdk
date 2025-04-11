@@ -7,6 +7,7 @@ This **Configuration-driven AWS Deployment Tool** empowers you to create your AW
 ─────────────────────────
 
 This deployment framework supports:
+
 • Modular Infrastructure Setup – Define only the services you need.
 • Comprehensive Service Coverage – VPCs, security groups, compute resources, databases, object storage, Kubernetes clusters, etc.
 • Inline IAM Policies – Easily attach inline policies to resources (e.g., Lambda functions) for fine-grained access control.
