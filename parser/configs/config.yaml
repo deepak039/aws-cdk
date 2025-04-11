@@ -9,6 +9,9 @@ vpcs:
       - name: "private"
         type: "PRIVATE_WITH_EGRESS"
         cidr_mask: 24
+      - name: "private-isolated"
+        type: "PRIVATE_ISOLATED"
+        cidr_mask: 24  
 
 security_groups:
   - name: "sec-group-1"
@@ -19,6 +22,11 @@ security_groups:
       - cidr: "10.0.0.0/16"
         description: "Allow all traffic within VPC"
         port: "ALL_TRAFFIC"
+      - cidr: "0.0.0.0/0"
+        description: "Allow all traffic from internet"
+        protocol: "TCP"
+        port: 80
+        
 
 vpc_endpoints:
   - service: dynamodb
@@ -45,14 +53,14 @@ api_gateways:
         method: "GET"
 
 
-# rds:
-#   - name: "TestRDSInstance"
-#     vpc: "main-vpc"
-#     security_group: "sec-group-1"
-#     engine: "maria_db"          # mysql, postgres, maria_db, oracle-se2
-#     database_name: "testdb"
-#     master_username: "admin"
-#     master_password: "password123"
+rds:
+  - name: "TestRDSInstance"
+    vpc: "main-vpc"
+    security_group: "sec-group-1"
+    engine: "maria_db"          # mysql, postgres, maria_db, oracle-se2
+    database_name: "testdb"
+    master_username: "admin"
+    master_password: "password123"
 
 s3_buckets:
   - name: "MyS3Bucket"
@@ -61,8 +69,7 @@ s3_buckets:
     bucket_key_enabled: true
     access_control: PRIVATE
     retain_on_delete: true
-    # file_upload:
-    #   local_path: ./assets  # Path to folder/files to upload into the bucket
+
     lifecycle:
       noncurrent_version_expiration_days: 30  
     bucket_policy:
@@ -72,3 +79,101 @@ s3_buckets:
         - s3:DeleteObject
 
     
+asg:
+  - name: myasg
+    vpc : 'main-v'
+    user_data_path : 'code-app.sh'
+    max: 3
+    min: 1 
+
+alb:
+  - name: myalb
+    vpc : 'main-v'
+    asg: myasg
+
+
+ec2:
+  name: my-ec2-instance                    # Required: Name for the EC2 instance
+  instance_type: t2.micro                  # Optional: EC2 instance type (default: t2.micro)
+  volume_size: 20                          # Optional: EBS volume size in GB (default: 8)
+  volume_type: gp3    
+                                # Optional: EBS volume type (default: gp3)
+  iops: 3000                              # Optional: IOPS for io1/io2 volumes
+  key_name: my-key-pair                   # Optional: SSH key pair name
+  availability_zone: us-east-1a           # Optional: AZ to launch instance in
+  termination_protection: false           # Optional: Enable/disable termination protection
+  instance_name: my-custom-name           # Optional: Custom name tag for instance
+  user_data_path: scripts/startup.sh      # Optional: Path to user data script
+  policy:                                 # Optional: List of IAM policies to attach
+    - s3_read_only
+    - cloudwatch_full_access
+
+eks:
+  name: "basic-eks-cluster"
+  vpc: "main-vpc"
+  admin_roles:
+    - arn: arn:aws:iam::533267104533:user/testuser
+  node_groups:
+    - name: "default-node-group"
+      min_size: 1
+      max_size: 3
+      desired_size: 2   
+
+    # advanced parameter eks 
+        #  eks:
+        #     name: "advanced-eks-cluster"
+        #     vpc: "main-vpc"
+        #     endpoint_access: PUBLIC_AND_PRIVATE
+        #     admin_roles:
+        #        - arn: "arn:aws:iam::123456789012:role/AdminRole1"
+        #        - arn: "arn:aws:iam::123456789012:role/AdminRole2"
+        #     node_groups:
+        #     - name: "compute-node-group"
+        #         instance_type: "c5.large"
+        #         min_size: 3
+        #         max_size: 10
+        #         desired_size: 5
+        #     - name: "gpu-node-group"
+        #         instance_type: "p3.large"
+        #         min_size: 1
+        #         max_size: 5
+        #         desired_size: 2
+        #     fargate_profiles:
+        #     - name: "fargate-apps-profile"
+        #         namespace: "apps"
+        #     helm_charts:
+        #     - name: "prometheus"
+        #         chart: "prometheus-community/prometheus"
+        #         repository: "https://prometheus-community.github.io/helm-charts"
+        #         namespace: "monitoring"
+        #         values:
+        #         service:
+        #             type: "ClusterIP"
+        #         pushgateway:
+        #             enabled: false
+        #     - name: "nginx-ingress"
+        #         chart: "ingress-nginx/ingress-nginx"
+        #         repository: "https://kubernetes.github.io/ingress-nginx"
+        #         namespace: "ingress-nginx"
+        #         values:
+        #         controller:
+        #             replicaCount: 2
+        #     manifests:
+        #     - name: "namespace-apps"
+        #         definition:
+        #         apiVersion: v1
+        #         kind: Namespace
+        #         metadata:
+        #             name: "apps"
+        #     - name: "custom-config-map"
+        #         definition:
+        #         apiVersion: v1
+        #         kind: ConfigMap
+        #         metadata:
+        #             name: "config-map"
+        #             namespace: "apps"
+        #         data:
+        #             setting1: "value1"
+        #             setting2: "value2"
+
+
