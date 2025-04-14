@@ -15,7 +15,7 @@ class ValidationChecker:
         "nat_gateways": [],
         "rds": ["name", "vpc", "security_group"],
         "s3_buckets": [],
-        "security_groups": ["name", "service", "description", "ingress_rule", "allow_all_outbound"],
+        "security_groups": ["name", "service", "description", "ingress_rules", "allow_all_outbound"],
         "subnet_groups": ["vpcs"],
         "vpcs": ["name", "cidr", "max_azs", "subnets"],
         "vpc_endpoints": ["name", "service", "vpc", "subnets"],
