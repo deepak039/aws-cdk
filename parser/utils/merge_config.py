@@ -1,5 +1,7 @@
 from parser.utils.config_loader import ConfigLoader
 from parser.utils.dependency_resolver import DependencyResolver
+from parser.utils.validation_checker import ValidationChecker
+
 
 class MergeConfig:
     @staticmethod
@@ -106,6 +108,7 @@ class MergeConfig:
         # Log merged configuration
         # print("\n=== Detailed Configuration of merged_config ===")
         # MergeConfig.print_config_details(merged_config, "merged_config")
+        ValidationChecker.validate_config(merged_config)
 
         return merged_config
 
