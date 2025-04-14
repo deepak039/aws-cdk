@@ -30,9 +30,10 @@ This deployment framework supports:
 4. Storage & Database Services  
   • Amazon S3 Buckets  
   • RDS Instances
-5. Containers & Orchestration  
+  • DynamoDB Tables
+6. Containers & Orchestration  
   • Elastic Kubernetes Service (EKS)
-6. IAM Inline Policies  
+7. IAM Inline Policies  
   • Easily attach inline IAM policies to resources such as Lambda functions
 
 ─────────────────────────
