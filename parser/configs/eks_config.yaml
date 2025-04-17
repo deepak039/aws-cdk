@@ -28,14 +28,7 @@ eks:
        
 
         #deployed by lambda layer at deploy time  define  eks resource  
-    manifest:
-      - name: "mynamespace"
-        definition:
-          apiVersion: v1
-          kind: Namespace        
-          metadata:
-          name: web-app
-
+    
 
 
     # helm_charts:

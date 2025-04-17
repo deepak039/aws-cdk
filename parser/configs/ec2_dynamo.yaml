@@ -15,12 +15,34 @@ vpc_endpoints:
     vpc: "main-v"
     subnets:
       - "PRIVATE_WITH_EGRESS"
+
+iam_permissions :
+  - name : "dynamoDB_Perm"
+    policies:
+        - action:
+            - dynamodb:GetItem
+            - dynamodb:PutItem
+            - dynamodb:UpdateItem
+            - dynamodb:DeleteItem
+            - dynamodb:Query
+            - dynamodb:Scan
+            - cloudwatch:PutMetricData
+            - ec2:DescribeVolumes
+            - ec2:DescribeTags
+            - logs:PutLogEvents
+            - logs:DescribeLogStreams
+            - logs:DescribeLogGroups
+            - logs:CreateLogStream
+            - logs:CreateLogGroup
+
 asg:
   - name: myasg
     vpc : 'main-v'
     user_data_path : 'code-app.sh'
     max: 3
     min: 1 
+    policy :
+     - "dynamoDB_Perm"
 
 alb:
   - name: myalb

@@ -16,7 +16,7 @@ const http = require("http");
 const AWS = require("aws-sdk");
 
 // Set AWS Region
-AWS.config.update({ region: "ap-south-1" }); // Adjust the region if needed
+AWS.config.update({ region: "ap-south1" }); // Adjust the region if needed
 
 // Initialize DynamoDB Document Client
 const dynamoDb = new AWS.DynamoDB.DocumentClient();
@@ -37,18 +37,18 @@ const server = http.createServer(async (req, res) => {
     const queryParams = req.url.split("?")[1];
     const params = new URLSearchParams(queryParams);
 
-    # const pk = params.get("pk");
-    # const sk = params.get("sk");
+    const pk = params.get("pk");
+    const sk = params.get("sk");
 
-    # if (!pk || !sk) {
-    #   res.statusCode = 400;
-    #   res.end("Missing 'pk' or 'sk' query parameters");
-    #   return;
-    # }
+    if (!pk || !sk) {
+      res.statusCode = 400;
+      res.end("Missing 'pk' or 'sk' query parameters");
+      return;
+    }
 
     const dynamoParams = {
-      TableName: "TestTable", // Replace with your DynamoDB table name
-      
+      TableName: "MyTable", // Replace with your DynamoDB table name
+      Key: { pk, sk }, // Key structure based on your schema
     };
 
     try {
@@ -85,7 +85,7 @@ const server = http.createServer(async (req, res) => {
         }
 
         const dynamoParams = {
-          TableName: "TestTable", // Replace with your DynamoDB table name
+          TableName: "MyTable", // Replace with your DynamoDB table name
           Item: item, // Item to be put in the table (include pk, sk, and other attributes)
         };
 
