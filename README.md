@@ -1,318 +1,248 @@
-# AWS CDK Infrastructure as Code Deployment Guide 🌟
 
-This **Configuration-driven AWS Deployment Tool** empowers you to create your AWS infrastructure effortlessly by simply defining your requirements through a YAML configuration file (config.yaml). Whether you need networking, compute, or serverless components, this tool enables you to deploy a complete AWS environment using AWS CDK.
+```markdown
+# AWS CDK Infrastructure as Code Project
 
-─────────────────────────
-⏩ Overview
-─────────────────────────
+A configuration-driven AWS infrastructure deployment tool that lets you create AWS infrastructure by simply defining YAML configurations. No coding required!
 
-This deployment framework supports:
+## 🚀 Features
 
-• Modular Infrastructure Setup – Define only the services you need.
-• Comprehensive Service Coverage – VPCs, security groups, compute resources, databases, object storage, Kubernetes clusters, etc.
-• Inline IAM Policies – Easily attach inline policies to resources (e.g., Lambda functions) for fine-grained access control.
+- Deploy multiple AWS services using simple YAML configuration
+- Supports VPC, Security Groups, EC2, Auto Scaling Groups, Load Balancers, DynamoDB, Lambda, API Gateway, RDS
+- Infrastructure as Code using AWS CDK
+- Modular service blocks that can be used independently
 
-─────────────────────────
-🛠 Supported AWS Services
-─────────────────────────
-1. Networking & Security  
-  • VPCs with customizable subnets  
-  • Security Groups with detailed ingress/egress rules  
-  • VPC Endpoints
-2. Compute & Auto Scaling  
-  • EC2 Instances  
-  • Auto Scaling Groups (ASG)  
-  • Application Load Balancers (ALB)
-3. Serverless Components  
-  • AWS Lambda Functions  
-  • API Gateway Integration  
-  • DynamoDB Tables
-4. Storage & Database Services  
-  • Amazon S3 Buckets  
-  • RDS Instances
-  • DynamoDB Tables
-6. Containers & Orchestration  
-  • Elastic Kubernetes Service (EKS)
-7. IAM Inline Policies  
-  • Easily attach inline IAM policies to resources such as Lambda functions
+## 🎯 Quick Start
 
-─────────────────────────
-🚀 Quick Start
-─────────────────────────
-1. Create and Activate a Python Virtual Environment  
-  (a) Linux/macOS:
+1. Install prerequisites:
+
+```bash
+python -m venv .venv
+source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+pip install -r requirements.txt
+pip install pyyaml
+pip install aws-cdk.lambda-layer-kubectl-v28
+arkdown
+# AWS CDK Infrastructure as Code Project
+
+A configuration-driven AWS infrastructure deployment tool that lets you create AWS infrastructure by simply defining YAML configurations. No coding required!
+
+## 🚀 Features
+
+- Deploy multiple AWS services using simple YAML configuration
+- Supports VPC, Security Groups, EC2, Auto Scaling Groups, Load Balancers, DynamoDB, Lambda, API Gateway, RDS
+- Infrastructure as Code using AWS CDK
+- Modular service blocks that can be used independently
+
+```markdown
+# AWS CDK Infrastructure as Code Project
+
+A configuration-driven AWS infrastructure deployment tool that lets you create AWS infrastructure by simply defining YAML configurations. No coding required!
+
+## 🚀 Features
+
+- Deploy multiple AWS services using simple YAML configuration 
+- Supports VPC, Security Groups, EC2, Auto Scaling Groups, Load Balancers, DynamoDB, Lambda, API Gateway, RDS, S3, EKS
+- Infrastructure as Code using AWS CDK
+- Modular service blocks that can be used independently
+
+## 🎯 Quick Start
+
+1. Install prerequisites:
+
+```bash
+python -m venv .venv
+source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+pip install -r requirements.txt
+pip install pyyaml
+pip install aws-cdk.lambda-layer-kubectl-v28
+arkdown
+# AWS CDK Infrastructure as Code Project
+
+A configuration-driven AWS infrastructure deployment tool that lets you create AWS infrastructure by simply defining YAML configurations. No coding required!
+
+## 🚀 Features
+
+- Deploy multiple AWS services using simple YAML configuration 
+- Supports VPC, Security Groups, EC2, Auto Scaling Groups, Load Balancers, DynamoDB, Lambda, API Gateway, RDS, S3, EKS
+- Infrastructure as Code using AWS CDK
+- Modular service blocks that can be used independently
+
+## 🎯 Quick Start
+
+🔒 Security Groups
+
 ```
-    $ python -m venv .venv  
-    $ source .venv/bin/activate
-```
-
-  (b) Windows:  
-```
-    > python -m venv .venv  
-    > .venv\Scripts\activate
-```
-
-3. Install Dependencies
-```
-  $ pip install -r requirements.txt  
-```
-
-
-5. Install and Configure AWS CDK
-```
-  $ npm install -g aws-cdk  
-  Make sure your AWS CLI is configured with:  
-  $ aws configure
-```  
-
-6. Create your <--your_config-->.yaml according to the guides below.
-
-7. Deploy Your Infrastructure
-```
-  $ cdk deploy -c config=<--your_config-->.yaml
-```  
-
-8. To clean up and delete resources when needed
-```
-  $ cdk destroy -c config=<--your_config-->.yaml
-```
-
-─────────────────────────
-📚 Configuration Reference
-─────────────────────────
-
-► VPC & Subnets – Easy Networking Setup  
-Define a Virtual Private Cloud along with subnets:
-
-
------------------------------------------------------
-```
-vpcs:
-  - name: "main-vpc"              # Required: VPC name
-    cidr: "10.0.0.0/16"           # Required: CIDR range
-    max_azs: 2                    # Optional: Maximum Availability Zones (defaults to 3)
-    subnets:
-      - name: "public"
-        type: "PUBLIC"            # Options: PUBLIC, PRIVATE_WITH_EGRESS, PRIVATE_ISOLATED
-        cidr_mask: 24
-      - name: "private"
-        type: "PRIVATE_WITH_EGRESS"
-        cidr_mask: 24
-```
-
-• Use PUBLIC subnets for internet-facing resources such as ALBs.
-• Use PRIVATE / ISOLATED subnets for databases and internal services.
-
-► Security Groups – Firewall Configuration  
-Manage traffic using finely tuned security group rules:
-```
------------------------------------------------------
 security_groups:
-  - name: "sec-group-1"                   # Required: Security group name
-    description: "Default VPC SG"         # Optional: Description of the group
-    service: "main-vpc"                   # Required: VPC reference
-    allow_all_outbound: true              # Optional: Allow outbound traffic
-    ingress_rules:                        # Required: List of inbound rules
-      - cidr: "10.0.0.0/16"
-        port: "ALL_TRAFFIC"               # Use ALL_TRAFFIC to allow all ports/protocols within VPC
-        description: "Allow all VPC traffic"
-      - protocol: "TCP"
-        port: 80
-        cidr: "0.0.0.0/0"
-        description: "Allow HTTP traffic from anywhere"
-```       
-
-► VPC Endpoints – Private Connectivity  
-Access AWS services privately using VPC endpoints:
------------------------------------------------------
+  - name: "web-sg"                     # Required: Security group name
+    service: "prod-vpc"                # Required: VPC name reference
+    rules:                            # Required: At least one rule
+      - port: 80
+        source: "0.0.0.0/0"
+        description: "HTTP access"
+      - port: 443
+        source: "0.0.0.0/0"
+        description: "HTTPS access"
 ```
-vpc_endpoints:
-  - service: dynamodb
-    name: "TestEndpoint"                  # User defined name for endpoint
-    vpc: "main-vpc"
-    subnets:
-      - "PRIVATE_WITH_EGRESS"             # Use one or more subnet types
-```       
 
-► EC2 Instances – Virtual Machines  
-Launch customizable compute instances:
------------------------------------------------------
+
+💻 EC2 Instances
+
 ```
 ec2:
-  - name: "analytics-server"              # Unique instance identifier
-    vpc: "main-vpc"                       # Required VPC reference
-    instance_type: "t2.micro"             # Specify instance type
-    volume_size: 20                       # Storage (GB)
-    security_group: "sec-group-1"         # Associated security group
-    key_name: "admin-key"                 # Optional SSH key pair for access
-    user_data_path: "scripts/analytics.sh" # Startup script
-```    
-
-► Auto Scaling Groups (ASG) – Dynamic Compute Scaling  
-Scale EC2 instances dynamically based on demand:
------------------------------------------------------
-```
-asg:
-  - name: "web-asg"
-    vpc: "main-vpc"
-    user_data_path: "scripts/init.sh"     # Optional: Bootstrapping script
-    min: 1                                # Minimum number of instances
-    max: 3                                # Maximum number of instances
-    desired: 2                            # Desired count at launch
+  - name: "web-server"                # Required: Instance name
+    vpc: "prod-vpc"                   # Required: VPC name reference
+    security_group: "web-sg"          # Required: Security group reference
+    user_data_path: "scripts/init.sh" # Optional: Startup script
 ```
 
-► Load Balancers (ALB) – Traffic Distribution  
-Distribute traffic across multiple instances:
------------------------------------------------------
+
+🔄 Auto Scaling Groupasg:
+
+```
+  - name: "web-asg"                   # Required: ASG name
+    vpc: "prod-vpc"                   # Required: VPC name reference
+    min: 1                           # Required: Minimum instances
+    max: 3                           # Required: Maximum instances
+    desired: 2                       # Required: Desired capacity
+    user_data_path: "scripts/init.sh" # Optional: Startup script
+```
+
+⚖️ Load Balancer
 ```
 alb:
-  - name: "web-alb"
-    vpc: "main-vpc"
-    asg: "web-asg"                        # Attach an Auto Scaling Group for backends
+  - name: "web-alb"                   # Required: ALB name
+    vpc: "prod-vpc"                   # Required: VPC name reference
+    asg: "web-asg"                    # Required: ASG name reference
 ```
 
-► DynamoDB Tables – NoSQL Database  
-Provision highly scalable, low-latency NoSQL tables:
------------------------------------------------------
+🧮 DynamoDB Tables
 ```
 dynamodb:
-  - name: "user-data-table"
-    partition_key:
-      name: "UserID"
-      type: "string"
-    sort_key:
-      name: "Timestamp"
+  - name: "users-table"              # Required: Table name
+    partition_key:                   # Required: Primary key
+      name: "userId"
+      type: "string"                # Options: string, number, binary
+    sort_key:                       # Optional: Sort key
+      name: "timestamp"
       type: "number"
-    billing_mode: "PAY_PER_REQUEST"       # Optional: Billing mode options```
-    
+    billing_mode: "PAY_PER_REQUEST" # Optional: Defaults to PAY_PER_REQUEST
 ```
-► AWS Lambda – Serverless Functions  
-Deploy Lambda functions with optional VPC access and security groups:
------------------------------------------------------
+
+⚡ Lambda Functions
+
 ```
 lambdas:
-  - name: "lambda1"
-    runtime: "python3.9"                  # Runtime environment: python, nodejs, etc.
-    handler: "index.handler"              # Entry point function handler
-    code_path: "lambda/lambda1"           # Local path to Lambda code
-    vpc: "main-vpc"                       # Optional: Attach Lambda to VPC
-    security_group: "sec-group-1"
-    policy:                              # Attach inline IAM policies via references
-      - "dynamoDB_Perm"
+  - name: "process-data"             # Required: Function name
+    runtime: "nodejs20.x"            # Required: Runtime
+    handler: "index.handler"         # Required: Handler
+    code_path: "./lambda/process"    # Required: Code location
+    vpc: "prod-vpc"                  # Optional: VPC name reference
+    security_group: "lambda-sg"      # Optional: Security group reference
 ```
-► API Gateway – Managed APIs  
-Expose your Lambda functions via REST APIs:
------------------------------------------------------
+
+🌐 API Gateway
+
 ```
 api_gateways:
-  - name: "user-api"
-    lambdaname: "lambda1"                 # Lambda function to integrate
+  - name: "api"                      # Required: API name
+    lambdaname: "process-data"       # Required: Lambda reference
+    routes:                         # Required: At least one route
+      - path: "/users"
+        method: "GET"
+    key: "api-key-1"                # Required: API key name
+```
+
+🗄️ RDS Database
+
+```
+rds_instances:
+  - name: "prod-db"                  # Required: Database name
+    vpc: "prod-vpc"                  # Required: VPC name reference
+    security_group: "db-sg"          # Required: Security group reference
+    instance_type: "t3.micro"        # Required: Instance size
+    engine: "mysql"                  # Required: Database engine
+    engine_version: "8.0"            # Required: Engine version
+    database_name: "myapp"           # Required: Database name
+    master_username: "admin"         # Required: Master username
+    port: 3306                      # Optional: Defaults to engine standard
+    backup_retention_days: 7         # Optional: Defaults to 7
+    deletion_protection: false       # Optional: Defaults to false
+```
+
+📋 Example Configurations
+Web Application Stack
+
+```
+vpcs:
+  - name: "web-vpc"
+    cidr: "10.0.0.0/16"
+
+security_groups:
+  - name: "web-sg"
+    service: "web-vpc"
+    rules:
+      - port: 80
+        source: "0.0.0.0/0"
+        description: "HTTP"
+
+asg:
+  - name: "web-asg"
+    vpc: "web-vpc"
+    min: 2
+    max: 4
+    desired: 2
+    user_data_path: "scripts/web-init.sh"
+
+alb:
+  - name: "web-alb"
+    vpc: "web-vpc"
+    asg: "web-asg"
+```
+
+Serverless API Stack
+
+```
+dynamodb:
+  - name: "users"
+    partition_key:
+      name: "userId"
+      type: "string"
+
+lambdas:
+  - name: "api-handler"
+    runtime: "nodejs20.x"
+    handler: "index.handler"
+    code_path: "./lambda/api"
+
+api_gateways:
+  - name: "users-api"
+    lambdaname: "api-handler"
     routes:
       - path: "/users"
         method: "GET"
-    key: "apikey-users"                   # API key reference for securing endpoints
+    key: "users-api-key"
 ```
 
-► S3 Buckets – Scalable Object Storage  
-Define S3 buckets with lifecycle policies and versioning:
------------------------------------------------------
+⚠️ Important Notes
+Only include services you need in your config
 
-```
-s3_buckets:
-  - name: "my-backup-bucket"
-    bucket_name: "backup-data-storage"
-    versioned: true                       # Ensure bucket versioning is enabled
-    bucket_key_enabled: true              # Enhance security with bucket key enabled
-    access_control: PRIVATE               # Specify access control (e.g., PRIVATE)
-    retain_on_delete: true                # Retain bucket on stack deletion
-    lifecycle:
-      noncurrent_version_expiration_days: 90
-    bucket_policy:
-      actions:
-        - "s3:GetObject"
-        - "s3:PutObject"
-```
+Names must be unique within each service type
 
-► RDS – Relational Database Service  
-Set up a relational database with backup and security configuration:
------------------------------------------------------
-```
-rds:
-  - name: "prod-db-instance"
-    vpc: "main-vpc"
-    security_group: "sec-group-1"         # Attach appropriate security group
-    instance_type: "db.m4.large"
-    engine: "mysql"                       # Options: mysql, postgres, maria_db, etc.
-    database_name: "prod_db"
-    master_username: "admin"
-    master_password: "SuperSecret123!"     # Use strong passwords or secrets manager
-    backup_retention_days: 7              # Optional: Automatic backup retention period
-    deletion_protection: true             # Prevent accidental deletion
-```
+When referencing other services (like VPC or security groups), use exact names
 
-► EKS – Elastic Kubernetes Service  
-Deploy scalable Kubernetes clusters with managed node groups:
------------------------------------------------------
-```
-eks:
-  - name: "web-cluster"
-    vpc: "main-vpc"
-    admin_roles:                          # IAM roles with admin access to the cluster
-      - arn: "arn:aws:iam::123456789012:user/admin"
-    node_groups:
-      - name: "app-nodes"
-        desired_size: 2
-        min_size: 1
-        max_size: 5
-    # Advanced options: Endpoint configurations, Fargate profiles, Helm charts, etc.
-```    
+Ensure all referenced paths (user_data_path, code_path) exist
+
+🔒 Security Best Practices
+Use private subnets for internal resources
+
+Limit security group access to necessary ports only
+
+Enable backup and encryption for databases
+
+Use API keys for API Gateway endpoints
+
+Store sensitive data in AWS Secrets Manager
+
     
 
-► IAM Permissions – Inline Policies for Fine-Grained Access Control  
-Attach inline IAM policies to resources such as Lambda functions:
------------------------------------------------------
-```
-iam_permissions:
-  - name: "dynamoDB_Perm"               # Policy name for reference
-    policies:
-      - action:
-          - "dynamodb:GetItem"
-          - "dynamodb:PutItem"
-          - "dynamodb:UpdateItem"
-          - "dynamodb:DeleteItem"
-          - "dynamodb:Query"
-          - "dynamodb:Scan"
-        resource: "*"                   # Optional: define specific ARNs if needed
 
-Then reference the IAM policy within your Lambda configuration:
------------------------------------------------------
-lambdas:
-  - name: "lambda1"
-    runtime: "python3.9"
-    handler: "index.handler"
-    code_path: "lambda/lambda1"
-    vpc: "main-vpc"
-    security_group: "sec-group-1"
-    policy:
-      - "dynamoDB_Perm"               # Attach inline IAM policy by name
-```        
-        
-        
-
-─────────────────────────
-🛠 Advanced Developer Notes
-─────────────────────────
-• Parameter Validation: Ensure your YAML configuration is consistent and all file paths (e.g., code_path, user_data_path) exist.
-• Resource Naming: Use unique names within each service type to avoid conflicts.
-• Security Best Practices:  
-  – Limit security group ingress access to only necessary ports/services.  
-  – Enable encryption and backups for databases and storage.  
-  – Regularly review and update IAM policies.
-• Extensibility: The configuration can be extended for additional services or advanced configurations as needed.
-
-─────────────────────────
-✨ Get Started Today!
-─────────────────────────
-With this configuration-driven approach, your AWS infrastructure is just one YAML file away. Customize your config.yaml, deploy using the AWS CDK, and manage a secure, scalable environment according to your needs.
-
-Happy building and innovating on AWS!
