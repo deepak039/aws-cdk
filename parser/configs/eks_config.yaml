@@ -1,6 +1,7 @@
 vpcs:
-  - cidr: "10.0.0.0/16"
-    name: "main-vpc"
+
+  - name: "main-vpc"
+    cidr: "10.0.0.0/16"
     max_azs: 2
     subnets:
       - name: "public"
@@ -13,14 +14,31 @@ vpcs:
 
 
 
-
 eks:
-  name: "basic-eks-cluster"
-  vpc: "main-vpc"
-  admin_roles:
-    - arn: arn:aws:iam::533267104533:user/testuser
-  node_groups:
-    - name: "default-node-group"
-      min_size: 1
-      max_size: 3
-      desired_size: 2
+  - name: "basic-eks-cluster"
+    vpc: "main-vpc"
+    admin_roles:
+      - arn: "arn:aws:iam::533267104533:user/testuser"
+    # node_groups:
+    #   - name: "default-node-group"
+    #     min_size: 1
+    #     max_size: 3
+    #     desired_size: 2
+
+       
+
+        #deployed by lambda layer at deploy time  define  eks resource  
+    manifest:
+      - name: "mynamespace"
+        definition:
+          apiVersion: v1
+          kind: Namespace        
+          metadata:
+          name: web-app
+
+
+
+    # helm_charts:
+    
+      
+  
