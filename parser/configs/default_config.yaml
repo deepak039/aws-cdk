@@ -36,7 +36,7 @@ api_gateways:
 
 vpcs:
   - cidr: "10.0.0.0/16"
-    max_azs: 1
+    max_azs: 2
     subnets:
       - name: "public"
         type: "PUBLIC"
@@ -49,8 +49,8 @@ security_groups:
   - description: "Default VPC security group"
     allow_all_outbound: true
 
-eks:
-  - version: "1.27"
-    instance_type: "t3.medium"
-    default_capacity: 2
+# eks:
+#   - version: "1.27"
+#     instance_type: "t3.medium"
+#     default_capacity: 2
     
