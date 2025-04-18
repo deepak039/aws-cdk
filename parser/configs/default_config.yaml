@@ -27,7 +27,7 @@ lambdas:
     code: "lambda1"
     handler: "index.handler"
     memory_size: 128
-    timeout: 3                     # Timeout in seconds
+    timeout: 10                     # Timeout in seconds
 
 
 api_gateways:
@@ -44,6 +44,7 @@ vpcs:
       - name: "private"
         type: "PRIVATE_WITH_EGRESS"
         cidr_mask: 24
+
 security_groups:
   - description: "Default VPC security group"
     allow_all_outbound: true

@@ -10,10 +10,6 @@ vpcs:
         type: "PRIVATE_WITH_EGRESS"
         cidr_mask: 24
 
-
-
-
-
 eks:
   name: "basic-eks-cluster"
   vpc: "main-vpc"

@@ -14,7 +14,7 @@ class DependencyResolver:
             'eks': ['vpcs'],
             'elasticache': ['vpcs', 'security_groups', 'subnet_groups'],
             'iam_permissions': [],
-            'lambdas': ['vpcs', 'security_groups'],
+            'lambdas': ['vpcs', 'security_groups','rds'],
             'nat_gateways': ['vpcs', 'subnet_groups'],
             'rds': ['vpcs', 'security_groups', 'subnet_groups'],
             's3_buckets': [],
