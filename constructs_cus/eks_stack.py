@@ -92,18 +92,18 @@ class EksStack(Construct):
         super().__init__(scope, config.get("name", "eks-cluster"), **kwargs)
         self.name = config.get("name", "eks-cluster")
 
-        # Create Roles
+        
         cluster_role = self.create_cluster_role()
         node_role = self.create_node_role()
 
-        # Create EKS Cluster
+        
         self.cluster = eks.Cluster(
             self,
             self.name,
             cluster_name=self.name,
             vpc=vpc,
             vpc_subnets=[{"subnet_type": ec2.SubnetType.PRIVATE_WITH_EGRESS}],
-            default_capacity=0,  # Default node capacity disabled
+            default_capacity=2,  
             role=cluster_role,
             version=eks.KubernetesVersion.V1_28,
             kubectl_layer=KubectlV28Layer(self, "kubectl"),
@@ -112,19 +112,19 @@ class EksStack(Construct):
             endpoint_access=config.get("endpoint_access", eks.EndpointAccess.PUBLIC_AND_PRIVATE),
         )
 
-        # Map admin IAM roles to Kubernetes system:masters
+        
         self.add_admin_roles(config.get("admin_roles", []))
 
-        # Add Node Groups
+        
         self.add_node_groups(config.get("node_groups", []), node_role)
 
-        # Add Fargate Profiles
+        
         self.add_fargate_profiles(config.get("fargate_profiles", []))
 
-        # Deploy Helm Charts
+       
         self.add_helm_charts(config.get("helm_charts", []))
 
-        # Deploy Kubernetes Manifests
+        
         self.add_manifests(config.get("manifests", []))
 
     def create_cluster_role(self):
@@ -153,7 +153,8 @@ class EksStack(Construct):
 
     def add_admin_roles(self, admin_roles):
         """Maps specified admin IAM roles to Kubernetes `system:masters` group."""
-        for admin_arn in admin_roles:
+        for admin_role_dict  in admin_roles:
+            admin_arn = admin_role_dict['arn']
             admin_role = iam.Role.from_role_arn(
                 self,
                 f"AdminRole-{admin_arn.split('/')[-1]}",

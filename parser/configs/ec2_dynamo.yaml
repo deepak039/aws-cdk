@@ -18,7 +18,8 @@ vpc_endpoints:
 
 iam_permissions :
   - name : "dynamoDB_Perm"
-    policies: 
+
+    policies:
         - action:
             - dynamodb:GetItem
             - dynamodb:PutItem
@@ -33,7 +34,10 @@ iam_permissions :
             - logs:DescribeLogStreams
             - logs:DescribeLogGroups
             - logs:CreateLogStream
-            - logs:CreateLogGroup 
+
+            - logs:CreateLogGroup
+
+
 asg:
   - name: myasg
     policy : 
@@ -42,6 +46,8 @@ asg:
     user_data_path : 'code-app.sh'
     max: 3
     min: 1 
+    policy :
+     - "dynamoDB_Perm"
 
 alb:
   - name: myalb

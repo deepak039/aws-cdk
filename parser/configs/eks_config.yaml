@@ -1,5 +1,9 @@
 vpcs:
-  - cidr: "10.0.0.0/16"
+
+
+  - name: "main-vpc"
+    cidr: "10.0.0.0/16"
+
     max_azs: 2
     subnets:
       - name: "public"
@@ -13,26 +17,18 @@ eks:
     vpc: "main-vpc"
     admin_roles:
       - arn: "arn:aws:iam::533267104533:user/testuser"
-    node_groups:
-      - name: "default-node-group"
-        min_size: 1
-        max_size: 3
-        desired_size: 2
-        #optional
-    # fargate_profiles:
-    #   - name: "fargate-apps-profile"
-    #     namespace: "apps"
-    # manifest:
-    #   - name: "mynamespace"
-    #     apiVersion: v1
-    #     kind: Namespace
-    #     metadata:
-    #     name: web-app
+    # node_groups:
+    #   - name: "default-node-group"
+    #     min_size: 1
+    #     max_size: 3
+    #     desired_size: 2
+
+       
+
+        #deployed by lambda layer at deploy time  define  eks resource  
+    
+
+
     # helm_charts:
-    #    - name: "nginx-ingress"
-    #      chart: "ingress-nginx/ingress-nginx"
-    #      repository: "https://kubernetes.github.io/ingress-nginx"
-    #      namespace: "ingress-nginx"
-    #      values:
-    #      controller:
-    #      replicaCount: 2
+    
+ 
