@@ -2,7 +2,7 @@ from aws_cdk import Stack
 from constructs import Construct
 
 from aws_cdk.aws_apigateway import RestApi, LambdaIntegration, AuthorizationType,Deployment,Stage,ApiKey,UsagePlan,ThrottleSettings
-from stacks.lambda_stack import LambdaStack
+from constructs_cus.lambda_stack import LambdaStack
 
 
 class ApiGatewayStack(Construct):

@@ -59,10 +59,10 @@ class ASGStack(Construct):
             desired_capacity=config.get("desired", 2),  # Use desired capacity
             role=asg_role,  # IAM Role is attached to instances
             vpc_subnets=ec2.SubnetSelection(
-                subnet_type=ec2.SubnetType.PRIVATE_WITH_EGRESS  # Restrict to private subnets
+                subnet_type=ec2.SubnetType.PUBLIC 
             ),
             user_data=user_data,
-            
+            instance_monitoring=autoscaling.Monitoring.DETAILED, # Enable detailed CloudWatch monitoring
         )
        
     
