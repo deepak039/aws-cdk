@@ -16,20 +16,9 @@ vpc_endpoints:
     vpc: "main-vpc"
     subnets:
       - "PRIVATE_WITH_EGRESS"
-iam_permissions :
-  - name : "dynamoDB_Perm"
-    policies: 
-        - action:
-            - dynamodb:GetItem
-            - dynamodb:PutItem
-            - dynamodb:UpdateItem
-            - dynamodb:DeleteItem
-            - dynamodb:Query
-            - dynamodb:Scan 
+      
 lambdas:
   - name: lambda1
-    policy : 
-      - "dynamoDB_Perm"
     vpc: 'main-vpc'
     security_group: "sec-group-1"
     

@@ -1,7 +1,9 @@
 vpcs:
 
+
   - name: "main-vpc"
     cidr: "10.0.0.0/16"
+
     max_azs: 2
     subnets:
       - name: "public"
@@ -10,10 +12,6 @@ vpcs:
       - name: "private"
         type: "PRIVATE_WITH_EGRESS"
         cidr_mask: 24
-
-
-
-
 eks:
   - name: "basic-eks-cluster"
     vpc: "main-vpc"
@@ -33,5 +31,4 @@ eks:
 
     # helm_charts:
     
-      
-  
+ 

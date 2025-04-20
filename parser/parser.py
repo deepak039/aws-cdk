@@ -148,7 +148,7 @@ class Parser(Stack):
 
         user_config_path = self.configName if os.path.isabs(self.configName) else os.path.join(base_dir, "configs", self.configName)
         default_config_path = self.defaultConfigPath if os.path.isabs(self.defaultConfigPath) else os.path.join(base_dir, "configs", self.defaultConfigPath)
-
+        iam_config_path =  os.path.join(base_dir, "configs", "iam_config.yaml")
         if not os.path.exists(user_config_path):
             raise FileNotFoundError(f"User configuration file not found: {user_config_path}")
         if not os.path.exists(default_config_path):
@@ -156,8 +156,15 @@ class Parser(Stack):
 
         # Load and merge configurations
         merged_config = MergeConfig.load_and_merge(user_config_path, default_config_path)
-
+        iam_config = ConfigLoader.load_config(iam_config_path)
         print(f"[DEBUG] Processing configuration with keys: {list(merged_config.keys())}")
+        
+        # adding permissions in iam file
+        for key, val in iam_config.items():
+            for instance in val:
+                inst_obj = self.function[key](config=instance)
+                self.resources[key][instance['name']] = inst_obj
+
         for key, val in merged_config.items():
             if key not in self.function:
                 raise KeyError(f"Unsupported resource type '{key}' in config file")
