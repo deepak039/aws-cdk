@@ -19,6 +19,8 @@ vpc_endpoints:
       
 lambdas:
   - name: lambda1
+    policy : 
+        - dynamoDB_Perm
     vpc: 'main-vpc'
     security_group: "sec-group-1"
     
