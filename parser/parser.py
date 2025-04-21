@@ -94,7 +94,7 @@ class Parser(Stack):
     
     def createLambda(self,config):
         print(f"[DEBUG] Creating Lambda function with config: {config}")
-        lambda_func = LambdaStack(scope = self,vpc = self.resources['vpcs'][config['vpc']].vpc,security_group = self.resources['security_groups'][config['security_group']].sg,config = config,permissions = self.resources['iam_permissions'])
+        lambda_func = LambdaStack(scope = self,vpc = self.resources['vpcs'][config['vpc']].vpc,security_group = self.resources['security_groups'][config['security_group']].sg,config = config,permissions = self.resources['iam_permissions'],resources=self.resources)
         return lambda_func
         
     
@@ -120,6 +120,12 @@ class Parser(Stack):
             resources=self.resources, 
             config=config
         )
+        # Add RDS endpoint information to resources
+        self.resources["rds"][config["name"]] = {
+            "db_instance": rds_stack.db_instance,
+            "db_endpoint": rds_stack.db_endpoint,
+            "db_port": rds_stack.db_port,
+        }
         return rds_stack
 
     def createS3Bucket(self, config):
