@@ -1,0 +1,51 @@
+vpcs:
+  - name: "main-vpc"
+    max_azs: 2
+
+security_groups:
+  - name: "sec-group-1"
+    service: "main-vpc"
+    ingress_rules:
+      - cidr: "10.0.0.0/16"
+        description: "Allow all traffic within VPC"
+        port: "ALL_TRAFFIC"
+
+vpc_endpoints:
+  - service: dynamodb
+    name: "TestEndpoint"
+    vpc: "main-vpc"
+    subnets:
+      - "PRIVATE_WITH_EGRESS"
+      
+lambdas:
+  - name: lambda1
+    policy : 
+        - dynamoDB_Perm
+    vpc: 'main-vpc'
+    security_group: "sec-group-1"
+    
+api_gateways:
+  - name: apigateway1
+    lambdaname: lambda1
+    key : "HelloWorld"
+    routes:
+      - path: "/retrieve"
+        method: "GET"
+      - path: "/put"
+        method: "POST"
+        
+dynamodb:
+  - name: "TestTable"
+    
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,34 @@
+vpcs:
+
+
+  - name: "main-vpc"
+    cidr: "10.0.0.0/16"
+
+    max_azs: 2
+    subnets:
+      - name: "public"
+        type: "PUBLIC"
+        cidr_mask: 24
+      - name: "private"
+        type: "PRIVATE_WITH_EGRESS"
+        cidr_mask: 24
+eks:
+  - name: "basic-eks-cluster"
+    vpc: "main-vpc"
+    admin_roles:
+      - arn: "arn:aws:iam::533267104533:user/testuser"
+    # node_groups:
+    #   - name: "default-node-group"
+    #     min_size: 1
+    #     max_size: 3
+    #     desired_size: 2
+
+       
+
+        #deployed by lambda layer at deploy time  define  eks resource  
+    
+
+
+    # helm_charts:
+    
+ 
