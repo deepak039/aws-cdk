@@ -1,14 +1,13 @@
 #!/bin/bash
-
 # Update packages and install basic dependencies
 sudo yum update -y
 sudo yum install -y gcc-c++ make
 sudo curl -sL https://rpm.nodesource.com/setup_16.x | sudo bash -
 sudo yum install -y nodejs
-
 # Create a directory for the application
 mkdir -p /home/ec2-user/my-node-app
 cd /home/ec2-user/my-node-app
+
 
 # Create a Node.js application with DynamoDB interaction (adapted for pk/sk schema)
 cat <<EOL > app.js
@@ -106,10 +105,29 @@ const server = http.createServer(async (req, res) => {
   res.end("Route not found");
 });
 
+    dynamodb.getItem(params, (err, data) => {
+      if (err) {
+        console.error("Error retrieving item:", err);
+        res.statusCode = 500;
+        res.setHeader("Content-Type", "application/json");
+        res.end(JSON.stringify({ message: "Failed to retrieve item" }));
+      } else {
+        res.statusCode = 200;
+        res.setHeader("Content-Type", "application/json");
+        res.end(JSON.stringify(data.Item || { message: "Item not found" }));
+      }
+    });
+  } else {
+    res.statusCode = 404;
+    res.setHeader("Content-Type", "text/plain");
+    res.end("Not Found");
+  }
+});
 server.listen(port, () => {
   console.log(\`Server running at http://localhost:\${port}/\`);
 });
 EOL
+
 
 # Install project dependencies
 npm init -y

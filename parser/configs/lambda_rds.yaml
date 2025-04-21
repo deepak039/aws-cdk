@@ -56,7 +56,7 @@ rds:
   - name: "TestRDSInstance1"
     vpc: "main-vpc"
     security_group: "sec-group-1"
-    engine: "mysql"          # mysql, postgres, maria_db, oracle-se2
+    engine: "mysql"       
     database_name: "testdb"
     master_username: "admin1"
     master_password: "password123"
