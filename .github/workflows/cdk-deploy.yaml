@@ -27,30 +27,30 @@ jobs:
         aws-secret-access-key: hmtqjqWEWowl1ejhbXOqcp1Wgsnzgk5Gy8ukkBKZ
         aws-region: us-east-1
 
-    # Step 3: Clone the external GitHub repository
-    - name: Clone External Repository
+    # Step 3: Clone the external GitHub repository into parser/config/external-repo
+    - name: Clone External Repository to parser/config/external-repo
       run: |
-        echo "Cloning external repository: ${{ github.event.inputs.external-repo-url }}"
-        git clone ${{ github.event.inputs.external-repo-url }} external-repo
-        echo "Repository cloned successfully"
-        ls -la external-repo
+        echo "Cloning external repository: ${{ github.event.inputs.external-repo-url }} into 'parser/config/external-repo'"
+        git clone ${{ github.event.inputs.external-repo-url }} parser/config/external-repo
+        echo "External repository cloned successfully"
+        ls -la parser/config/external-repo
 
     # Step 4: Validate config file existence in external repository
     - name: Validate Config File in External Repository
       run: |
-        CONFIG_FILE="external-repo/${{ github.event.inputs.config-file }}"
+        CONFIG_FILE="parser/config/external-repo/${{ github.event.inputs.config-file }}"
         echo "Constructed config file path: $CONFIG_FILE"
         if [ -z "$CONFIG_FILE" ]; then
           echo "Error: Config file input is required!"
           exit 1
         fi
         if [ ! -f "$CONFIG_FILE" ]; then
-          echo "Error: Specified config file '$CONFIG_FILE' not found in the external repository!"
+          echo "Error: Specified config file '$CONFIG_FILE' not found in the cloned external repository!"
           exit 1
         fi
         echo "Config file '$CONFIG_FILE' found successfully!"
       env:
-        CONFIG_FILE: external-repo/${{ github.event.inputs.config-file }}
+        CONFIG_FILE: parser/config/external-repo/${{ github.event.inputs.config-file }}
 
     # Step 5: Set up Python environment
     - name: Set Up Python Environment
@@ -82,4 +82,4 @@ jobs:
     - name: Deploy AWS CDK Stack
       run: |
         echo "Starting CDK deployment..."
-        cdk deploy -c config="${{ env.CONFIG_FILE }}" --require-approval=never
+        cdk deploy -c config="parser/config/external-repo/${{ github.event.inputs.config-file }}" --require-approval=never
