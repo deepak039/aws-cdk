@@ -124,7 +124,7 @@ class LambdaStack(Construct):
         code = ''
 
         if config['file_type'] == 'zip':
-            code = Code.from_asset(f'parser/configs/external-repo{config["code"]}') 
+            code = Code.from_asset(f'parser/configs/external-repo/{config["code"]}') 
         else:
             # logic of container code
             raise NotImplementedError("Container-based Lambda deployment is not yet supported.")
