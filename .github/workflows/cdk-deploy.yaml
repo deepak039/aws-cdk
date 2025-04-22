@@ -1,0 +1,54 @@
+name: Deploy CDK Stack
+
+on:
+  workflow_dispatch:
+    inputs:
+      config-file:  # This is the user-provided YAML file input
+        description: 'Path to the external config YAML file for the CDK deployment (must be provided dynamically)'
+        required: true
+        default: ''  # No predefined default as this must come from the user
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    # Checkout the repository
+    - name: Checkout Repository
+      uses: actions/checkout@v3
+
+    # Set up Node.js environment
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: 16  # Use the Node.js version that matches your CDK setup
+
+    # Install AWS CDK and project dependencies
+    - name: Install Dependencies
+      run: |
+        npm install -g aws-cdk  # Install AWS CDK globally
+        npm install             # Install project dependencies
+
+    # Ensure AWS credentials are configured (uses OpenID Connect or Secrets)
+    - name: Configure AWS Credentials
+      uses: aws-actions/configure-aws-credentials@v2
+      with:
+        role-to-assume: arn:aws:iam::577638360152:role/githubaction # Role ARN or setup AWS credentials
+        aws-region: us-east-1                             # Modify to your region
+
+    # Validate user input and ensure the config file is present
+    - name: Check Config File
+      run: |
+        if [ -z "${{ github.event.inputs.config-file }}" ]; then
+          echo "Error: Config file input is required."
+          exit 1
+        fi
+        if [ ! -f "${{ github.event.inputs.config-file }}" ]; then
+          echo "Error: Config file '${{ github.event.inputs.config-file }}' not found!"
+          exit 1
+        fi
+
+    # Deploy the CDK stack using the config file
+    - name: Deploy CDK Stack
+      run: |
+        cdk deploy -c config="${{ github.event.inputs.config-file }}"
