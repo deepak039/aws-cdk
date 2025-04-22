@@ -121,7 +121,7 @@ class LambdaStack(Construct):
         code = ''
 
         if config['file_type'] == 'zip':
-            code = Code.from_asset(config["code"]) 
+            code = Code.from_asset(f'parser/configs/external-repo/{config["code"]}') 
         else:
             # logic of container code
             pass
