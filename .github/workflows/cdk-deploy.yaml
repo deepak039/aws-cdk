@@ -4,44 +4,70 @@ on:
   workflow_dispatch:
     inputs:
       config-file:  # This is the user-provided YAML file input
-        description: 'Path to the external config YAML file for the CDK deployment (must be provided dynamically)'
+        description: 'Path to the external config YAML file for the CDK deployment'
         required: true
-        default: ''  # No predefined default as this must come from the user
+        default: ''  # No predefined default; must be provided dynamically by the user
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
     steps:
-    # Checkout the repository
+    # Step 1: Checkout the repository
     - name: Checkout Repository
       uses: actions/checkout@v3
 
-    # Set up Node.js environment
-    - name: Set up Node.js
+    # Step 2: Debug: Check Directory Structure
+    - name: Check Directory Structure (Debugging)
+      run: |
+        echo "Current working directory:"
+        pwd
+        echo "Files in directory:"
+        ls -la
+
+    # Step 3: Set up Python environment
+    - name: Set Up Python Environment
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.9"  # Set Python version (3.9 or higher recommended)
+
+    # Step 4: Install dependencies from requirements.txt
+    - name: Install Python Dependencies
+      run: |
+        if [ ! -f requirements.txt ]; then
+          echo "Error: requirements.txt file not found!"
+          exit 1
+        fi
+        python -m pip install --upgrade pip  # Upgrade pip
+        pip install -r requirements.txt     # Install dependencies from requirements.txt
+
+    # Step 5: Set up Node.js environment
+    - name: Set up Node.js Environment
       uses: actions/setup-node@v3
       with:
-        node-version: 16  # Use the Node.js version that matches your CDK setup
+        node-version: 18  # Upgrade to Node.js v18 (recommended for AWS CDK)
 
-    # Install AWS CDK and project dependencies
-    - name: Install Dependencies
+    # Step 6: Install AWS CDK globally and project dependencies
+    - name: Install AWS CDK Globally
       run: |
         npm install -g aws-cdk  # Install AWS CDK globally
-        npm install             # Install project dependencies
+        npm install             # Install Node.js project dependencies (if using package.json)
 
-    # Validate user input and ensure the config file is present
-    - name: Check Config File
+    # Step 7: Validate user input and ensure the config file is present
+    - name: Validate Config File Path
       run: |
+        echo "User-provided config file path: ${{ github.event.inputs.config-file }}"
         if [ -z "${{ github.event.inputs.config-file }}" ]; then
-          echo "Error: Config file input is required."
+          echo "Error: Config file input is required!"
           exit 1
         fi
         if [ ! -f "${{ github.event.inputs.config-file }}" ]; then
-          echo "Error: Config file '${{ github.event.inputs.config-file }}' not found!"
+          echo "Error: Specified config file '${{ github.event.inputs.config-file }}' not found!"
           exit 1
         fi
 
-    # Deploy the CDK stack using the config file
-    - name: Deploy CDK Stack
+    # Step 8: Deploy the CDK stack using the config file
+    - name: Deploy AWS CDK Stack
       run: |
+        echo "Starting CDK deployment using config file: ${{ github.event.inputs.config-file }}"
         cdk deploy -c config="${{ github.event.inputs.config-file }}"
