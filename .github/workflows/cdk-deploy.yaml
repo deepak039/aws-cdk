@@ -29,13 +29,6 @@ jobs:
         npm install -g aws-cdk  # Install AWS CDK globally
         npm install             # Install project dependencies
 
-    # Ensure AWS credentials are configured (uses OpenID Connect or Secrets)
-    - name: Configure AWS Credentials
-      uses: aws-actions/configure-aws-credentials@v2
-      with:
-        role-to-assume: arn:aws:iam::577638360152:role/githubaction # Role ARN or setup AWS credentials
-        aws-region: us-east-1                             # Modify to your region
-
     # Validate user input and ensure the config file is present
     - name: Check Config File
       run: |
