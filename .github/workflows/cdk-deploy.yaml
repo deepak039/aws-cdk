@@ -33,7 +33,7 @@ jobs:
         echo "Cloning external repository: ${{ github.event.inputs.external-repo-url }} into 'parser/configs/external-repo'"
         git clone ${{ github.event.inputs.external-repo-url }} parser/configs/external-repo
         echo "External repository cloned successfully"
-        ls -la parser/config/external-repo
+        ls -la parser/configs/external-repo
 
     # Step 4: Validate config file existence in external repository
     - name: Validate Config File in External Repository
