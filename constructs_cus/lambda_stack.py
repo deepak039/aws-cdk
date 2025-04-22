@@ -1,4 +1,3 @@
-
 """
 LambdaStack Class
 ----------------
@@ -71,22 +70,24 @@ from aws_cdk import (
     Stack,
    
 )
-from aws_cdk import aws_ec2 as ec2
+from aws_cdk import aws_ec2 as ec2, Duration
 from constructs import Construct
 from aws_cdk.aws_lambda import Function, Runtime, Code
 from aws_cdk.aws_iam import Role, ServicePrincipal, ManagedPolicy,PolicyStatement
 from dependencies.lambda_functions import addDynamoDBRole 
 class LambdaStack(Construct):
-    def __init__(self, scope: Construct,config:dict,permissions : dict,vpc = None,security_group = None, **kwargs):
+    def __init__(self, scope: Construct,config:dict,permissions : dict,vpc = None,security_group = None, resources: dict = None, **kwargs):
         super().__init__(scope, config['name'], **kwargs)
         self.name = config['name']
+
         print(vpc,security_group)
         self.lambda_role = Role(
             self,
             "LambdaExecutionRole",  
             assumed_by=ServicePrincipal("lambda.amazonaws.com"),
             managed_policies=[
-                ManagedPolicy.from_aws_managed_policy_name("service-role/AWSLambdaBasicExecutionRole")
+                ManagedPolicy.from_aws_managed_policy_name("service-role/AWSLambdaBasicExecutionRole"),
+                ManagedPolicy.from_aws_managed_policy_name("service-role/AWSLambdaVPCAccessExecutionRole")
             ]
         )
 
@@ -103,7 +104,9 @@ class LambdaStack(Construct):
                 actions=[
                     "ec2:CreateNetworkInterface",
                     "ec2:DescribeNetworkInterfaces",
-                    "ec2:DeleteNetworkInterface"
+                    "ec2:DeleteNetworkInterface",
+                    "ec2:DescribeInstances",
+                    "ec2:AttachNetworkInterface"
                 ],
                 resources=["*"]  
             )
@@ -124,8 +127,23 @@ class LambdaStack(Construct):
             code = Code.from_asset(f'parser/configs/external-repo{config["code"]}') 
         else:
             # logic of container code
-            pass
+            raise NotImplementedError("Container-based Lambda deployment is not yet supported.")
+        
+        # Prepare environment variables
+        environment = config.get('environment', {})
 
+
+        # Add RDS connection details to environment variables if RDS is specified
+        if "rds_instance" in config and config["rds_instance"] in resources.get("rds", {}):
+            rds_instance = resources["rds"][config["rds_instance"]]
+            print(f"[DEBUG] RDS instance found: {rds_instance.db_endpoint}, port: {rds_instance.db_port}")
+            
+            environment.update({
+                "db_host": rds_instance.db_endpoint,
+                "db_port": str(rds_instance.db_port),
+            })
+        else:
+            print("[DEBUG] No RDS instance specified in config, skipping RDS environment variables.")
         
         self.my_lambda = Function(
             self,
@@ -137,7 +155,23 @@ class LambdaStack(Construct):
             vpc_subnets=ec2.SubnetSelection(subnet_type=ec2.SubnetType.PRIVATE_WITH_EGRESS),
             security_groups = [security_group],
             role=self.lambda_role,
+            environment=environment,  # Pass environment variables
+            memory_size=config.get("memory_size", 128),
+            timeout=Duration.seconds(config.get("timeout", 10)),
         )
+        #  # Add logs for debugging
+        # print(f"[DEBUG] LambdaStack environment variables:")
+        # print(f"[DEBUG] Environment Variables: {environment}")
+        # if "db_host" in environment:
+        #     print(f"[DEBUG] DB_HOST: {environment['db_host']}")
+        # if "db_port" in environment:
+        #     print(f"[DEBUG] DB_PORT: {environment['db_port']}")
+        # if "db_name" in environment:
+        #     print(f"[DEBUG] DB_NAME: {environment['db_name']}")
+        # if "db_username" in environment:
+        #     print(f"[DEBUG] DB_USERNAME: {environment['db_username']}")
+        # if "db_password" in environment:
+        #     print(f"[DEBUG] DB_PASSWORD: {environment['db_password']}")
            
     def _resolve_runtime(self, runtime: str):
         runtime_options = {

@@ -1,6 +1,5 @@
 vpcs:
   - name: "main-vpc"
-    cidr: "10.0.0.0/16"
     max_azs: 2
 
 security_groups:
@@ -9,14 +8,37 @@ security_groups:
     ingress_rules:
       - cidr: "10.0.0.0/16"
         description: "Allow all traffic within VPC"
+        port: "3306"
+      - cidr: "10.0.0.0/16"
+        description: "Allow all traffic within VPC"
         port: "ALL_TRAFFIC"
+    egress_rules: 
+      - cidr: "0.0.0.0/0"
+        description: "Allow all outbound traffic"
+        port: "ALL_TRAFFIC"
+
+iam_permissions :
+  - name : "rds_access"
+    policies: 
+        - action:
+            - rds-db:connect
+            - rds:DescribeDBInstances
+          resource: "*"
 
 lambdas:
   - name: lambda1
+    runtime: "nodejs_18"
     file_type: 'zip'
-    code: "lambda1"
+    code: "lambda3"
     vpc: 'main-vpc'
     security_group: "sec-group-1"
+    rds_instance: "TestRDSInstance1"
+    environment:
+      db_username: "admin1"
+      db_password: "password123"
+      db_host: ""
+      db_port: ""
+      db_name: "testdb"
 
 
 api_gateways:
@@ -24,8 +46,10 @@ api_gateways:
     lambdaname: lambda1
     key : "HelloWorld"
     routes:
-      - path: "/route1"
+      - path: "/retrieve"
         method: "GET"
+      - path: "/insert"
+        method: "POST"
 
 
 rds:

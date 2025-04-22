@@ -3,7 +3,7 @@ from parser.exceptions import MissingKeyException
 
 class ValidationChecker:
     SERVICE_MANDATORY_KEYS = {
-        "alb": ["name", "name", "asg"],
+        "alb": ["name", "asg"],
         "api_gateways": ["name", "lambdaname", "routes"],
         "asg": ["name", "vpc", "user_data_path", "max", "min"],
         "dynamodb": ["name", "partition_key"],
@@ -14,7 +14,7 @@ class ValidationChecker:
         "lambdas": ["name", "runtime", "handler", "memory_size", "timeout"],
         "nat_gateways": [],
         "rds": ["name", "vpc", "security_group"],
-        "s3_buckets": [],
+        "s3_buckets": ["name"],
         "security_groups": ["name", "service", "description", "ingress_rules", "allow_all_outbound"],
         "subnet_groups": ["vpcs"],
         "vpcs": ["name", "cidr", "max_azs", "subnets"],
