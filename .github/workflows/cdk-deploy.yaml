@@ -50,7 +50,7 @@ jobs:
         fi
         echo "Config file '$CONFIG_FILE' found successfully!"
       env:
-        CONFIG_FILE: parser/config/external-repo/${{ github.event.inputs.config-file }}
+        CONFIG_FILE: /external-repo/${{ github.event.inputs.config-file }}
 
     # Step 5: Set up Python environment
     - name: Set Up Python Environment
@@ -82,4 +82,4 @@ jobs:
     - name: Deploy AWS CDK Stack
       run: |
         echo "Starting CDK deployment..."
-        cdk deploy -c config="parser/config/external-repo/${{ github.event.inputs.config-file }}" --require-approval=never
+        cdk deploy -c config="external-repo/${{ github.event.inputs.config-file }}" --require-approval=never
