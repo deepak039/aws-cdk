@@ -9,12 +9,12 @@ from aws_cdk import (
 from constructs import Construct
 
 class RDSStack(Construct):
-    def __init__(self, scope: Construct, resources, config: dict, **kwargs):
+    def __init__(self, scope: Construct, vpc,sg, config: dict, **kwargs):
         super().__init__(scope, config["name"], **kwargs)
 
         self.name = config["name"]
         # Retrieve the default VPC from resources
-        self.vpc = resources['vpcs'][config["vpc"]].vpc
+        self.vpc = vpc
 
         # Map removal policies for lifecycle
         removal_policy_map = {
@@ -40,7 +40,7 @@ class RDSStack(Construct):
             instance_type=ec2.InstanceType(config["instance_type"]),
             allocated_storage=config["allocated_storage"],
             vpc=self.vpc,
-            security_groups=[resources['security_groups'][config["security_group"]].sg],
+            security_groups=[sg],
             database_name=config["database_name"],
             backup_retention=Duration.days(config["backup_retention_days"]),
             deletion_protection=config["deletion_protection"],

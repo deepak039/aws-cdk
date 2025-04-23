@@ -15,6 +15,7 @@ from constructs_cus.asg_stack import ASGStack
 from constructs_cus.alb_stack import ALBStack
 from constructs_cus.s3bucket_stack import S3BucketStack
 from constructs_cus.eks_stack import EksStack
+from .resource_registry import ResourceRegistry
 
 from constructs import Construct
 import yaml
@@ -28,7 +29,7 @@ class Parser(Stack):
     def __init__(self,app : Construct,configName : str, defaultConfigPath: str):
          super().__init__(app, "ParserStack")
          print(f"[DEBUG] Received configName: {configName}")
-         self.resources = defaultdict(dict)
+         self.registry = ResourceRegistry()
          self.configName = configName
          self.defaultConfigPath = defaultConfigPath
          self.app = app
@@ -59,12 +60,14 @@ class Parser(Stack):
 
     def createVpcEndpoints(self,config):
         print(f"[DEBUG] Creating VPC Endpoint with config: {config}")
-        vpc_endpoint = VpcEndpoint(scope = self,vpc=self.resources['vpcs'][config['vpc']].vpc,config=config)
+        vpc=self.registry.get('vpcs', config['vpc'])
+        vpc_endpoint = VpcEndpoint(scope = self,vpc=vpc.vpc,config=config)
         return vpc_endpoint
 
     def createSecurityGroups(self,config):
         print(f"[DEBUG] Creating Security Group with config: {config}")
-        sec_group = SecurityGroupStack(scope = self,vpc = self.resources['vpcs'][config['service']].vpc,config = config)
+        vpc=self.registry.get('vpcs',config['service'])
+        sec_group = SecurityGroupStack(scope = self,vpc = vpc.vpc,config = config)
         return sec_group
 
     def createVpc(self,config):
@@ -74,39 +77,56 @@ class Parser(Stack):
 
     def createEc2(self,config):
         print(f"[DEBUG] Creating EC2 instance with config: {config}")
-        ec2Instance = Ec2Stack(scope = self,vpc = self.resources['vpcs'][config['vpc']].vpc,security_group = self.resources['security_groups'][config['security_group']].sg,config = config,permissions = self.resources['iam_permissions'])
+        vpc=self.registry.get('vpcs',config['vpc'])
+        sg=self.registry.get('security_groups', config['security_group'])
+        permissions = self.registry.all()['iam_permissions']
+        ec2Instance = Ec2Stack(scope = self,vpc = vpc.vpc,security_group = sg.sg,config = config,permissions = permissions)
         return ec2Instance   
     
     def createAsg(self,config):
         print(f"[DEBUG] Creating Auto Scaling Group with config: {config}")
-        asgg = ASGStack(scope = self,vpc = self.resources['vpcs'][config['vpc']].vpc,config = config,permissions = self.resources['iam_permissions'])
+        vpc=self.registry.get('vpcs', config['vpc'])
+        permissions = self.registry.all()['iam_permissions']
+        rds=self.registry.maybe_get('rds', config.get('rds_instance')) if 'rds_instance' in config else None         
+        
+        asgg = ASGStack(scope = self,vpc = vpc.vpc,config = config,permissions = permissions,rds=rds)
         return asgg   
     
     def createEksCluster(self, config):
         print(f"[DEBUG] Creating EKS cluster with config: {config}")
-        eks = EksStack(scope = self, vpc = self.resources['vpcs'][config['vpc']].vpc, config = config)
+        vpc=self.registry.get('vpcs', config['vpc'])
+        eks = EksStack(scope = self, vpc = vpc.vpc, config = config)
         return eks
     
     def createAlb(self,config):
         print(f"[DEBUG] Creating Application Load Balancer with config: {config}")
-        alb=ALBStack(scope = self,vpc = self.resources['vpcs'][config['vpc']].vpc, asg=self.resources['asg'][config['asg']].asg,config = config)
+        vpc=self.registry.get('vpcs', config['vpc'])
+        asg=self.registry.get('asg', config['asg'])
+        alb=ALBStack(scope = self,vpc = vpc.vpc, asg=asg.asg,config = config)
         return alb
     
     def createLambda(self,config):
         print(f"[DEBUG] Creating Lambda function with config: {config}")
-        lambda_func = LambdaStack(scope = self,vpc = self.resources['vpcs'][config['vpc']].vpc,security_group = self.resources['security_groups'][config['security_group']].sg,config = config,permissions = self.resources['iam_permissions'],resources=self.resources)
+        vpc=self.registry.get('vpcs',config['vpc'])
+        sg=self.registry.get('security_groups', config['security_group'])
+        permissions = self.registry.all()['iam_permissions']
+        rds=self.registry.maybe_get('rds', config['rds_instance']) 
+          
+        lambda_func = LambdaStack(scope = self,vpc = vpc.vpc,security_group = sg.sg,config = config,permissions = permissions,rds=rds)
         return lambda_func
         
     
-    def createApiGateway(self,config : dict):
-        print(f"[DEBUG] Creating/Updating API Gateway with config: {config}")
-        if config['name'] not in self.resources:
-            gateway = ApiGatewayStack(scope = self,lambda_stack = self.resources[config['lambdaname']],config = config)
-            gateway.createEndpoints(self.resources['lambdas'][config['lambdaname']],config['routes'],config['key'])
+    def createApiGateway(self, config):
+        if config['name'] not in self.registry.all()['api_gateways']:
+            lambda_stack = self.registry.get('lambdas', config['lambdaname'])
+            gateway = ApiGatewayStack(scope=self, lambda_stack=lambda_stack, config=config)
+            gateway.createEndpoints(lambda_stack, config['routes'], config['key'])
             return gateway
         else:
-            self.resources['api_gateways'][config['name']].createEndpoints(self.resources['lambdas'][config['lambdaname']],config['routes'],config['key'])
-            return self.resources[config['name']]
+            existing = self.registry.get('api_gateways', config['name'])
+            lambda_stack = self.registry.get('lambdas', config['lambdaname'])
+            existing.createEndpoints(lambda_stack, config['routes'], config['key'])
+            return existing
 
     def createDynamoDBTable(self, config):
         print(f"[DEBUG] Creating DynamoDB table with config: {config}")
@@ -115,17 +135,22 @@ class Parser(Stack):
 
     def createRDSInstance(self, config):
         print(f"[DEBUG] Creating RDS instance with config: {config}")
+        vpc=self.registry.get('vpcs',config['vpc'],'vpc')
+        sg=self.registry.get('security_groups', config['security_group'], 'sg')
         rds_stack = RDSStack(
             scope=self, 
-            resources=self.resources, 
+            vpc=vpc,
+            sg=sg, 
             config=config
         )
         # Add RDS endpoint information to resources
-        self.resources["rds"][config["name"]] = {
+        res = {
             "db_instance": rds_stack.db_instance,
             "db_endpoint": rds_stack.db_endpoint,
             "db_port": rds_stack.db_port,
         }
+        self.registry.register('rds', config['name'], res)
+        
         return rds_stack
 
     def createS3Bucket(self, config):
@@ -169,14 +194,19 @@ class Parser(Stack):
         for key, val in iam_config.items():
             for instance in val:
                 inst_obj = self.function[key](config=instance)
-                self.resources[key][instance['name']] = inst_obj
+                self.registry.register(key, instance['name'], inst_obj)
+                # self.resources[key][instance['name']] = inst_obj
 
         for key, val in merged_config.items():
             if key not in self.function:
                 raise KeyError(f"Unsupported resource type '{key}' in config file")
             for instance in val:
                 inst_obj = self.function[key](config=instance)
-                self.resources[key][instance['name']] = inst_obj
+                self.registry.register(key, instance['name'], inst_obj)
+                # self.resources[key][instance['name']] = inst_obj
 
         print("[DEBUG] Parser.run() completed")
+
+
+
 

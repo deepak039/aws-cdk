@@ -76,7 +76,7 @@ from aws_cdk.aws_lambda import Function, Runtime, Code
 from aws_cdk.aws_iam import Role, ServicePrincipal, ManagedPolicy,PolicyStatement
 from dependencies.lambda_functions import addDynamoDBRole 
 class LambdaStack(Construct):
-    def __init__(self, scope: Construct,config:dict,permissions : dict,vpc = None,security_group = None, resources: dict = None, **kwargs):
+    def __init__(self, scope: Construct,config:dict,permissions : dict,vpc = None,security_group = None, rds=None, **kwargs):
         super().__init__(scope, config['name'], **kwargs)
         self.name = config['name']
 
@@ -134,8 +134,8 @@ class LambdaStack(Construct):
 
 
         # Add RDS connection details to environment variables if RDS is specified
-        if "rds_instance" in config and config["rds_instance"] in resources.get("rds", {}):
-            rds_instance = resources["rds"][config["rds_instance"]]
+        if rds:
+            rds_instance = rds
             print(f"[DEBUG] RDS instance found: {rds_instance.db_endpoint}, port: {rds_instance.db_port}")
             
             environment.update({
