@@ -29,7 +29,7 @@ lambdas:
   - name: lambda1
     runtime: "nodejs_18"
     file_type: 'zip'
-    code: "./lambda3"
+    code: "lambda3"
     vpc: 'main-vpc'
     security_group: "sec-group-1"
     rds_instance: "TestRDSInstance1"

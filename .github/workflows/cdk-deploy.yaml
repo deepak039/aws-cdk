@@ -1,0 +1,85 @@
+name: Deploy CDK Stack
+
+on:
+  workflow_dispatch:
+    inputs:
+      external-repo-url:
+        description: 'URL of the external GitHub repository containing the config file (e.g., https://github.com/user/repo)'
+        required: true
+      config-file:
+        description: 'Filename of the YAML file for the CDK deployment (e.g., lambda.yaml)'
+        required: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    # Step 1: Checkout the main repository
+    - name: Checkout Main Repository
+      uses: actions/checkout@v3
+    
+    # Step 2: Configure AWS Credentials
+    - name : Aws Credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: AKIAYM7PN4RMP6WXKJ43
+        aws-secret-access-key: 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
+        aws-region: us-east-1
+
+    # Step 3: Clone the external GitHub repository into parser/config/external-repo
+    - name: Clone External Repository to parser/configs/external-repo
+      run: |
+        echo "Cloning external repository: ${{ github.event.inputs.external-repo-url }} into 'parser/configs/external-repo'"
+        git clone ${{ github.event.inputs.external-repo-url }} parser/configs/external-repo
+        echo "External repository cloned successfully"
+        ls -la parser/configs/external-repo
+
+    # Step 4: Validate config file existence in external repository
+    - name: Validate Config File in External Repository
+      run: |
+        CONFIG_FILE="parser/configs/external-repo/${{ github.event.inputs.config-file }}"
+        echo "Constructed config file path: $CONFIG_FILE"
+        if [ -z "$CONFIG_FILE" ]; then
+          echo "Error: Config file input is required!"
+          exit 1
+        fi
+        if [ ! -f "$CONFIG_FILE" ]; then
+          echo "Error: Specified config file '$CONFIG_FILE' not found in the cloned external repository!"
+          exit 1
+        fi
+        echo "Config file '$CONFIG_FILE' found successfully!"
+      env:
+        CONFIG_FILE: /external-repo/${{ github.event.inputs.config-file }}
+
+    # Step 5: Set up Python environment
+    - name: Set Up Python Environment
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.13.2"
+
+    # Step 6: Install Python dependencies
+    - name: Install Python Dependencies
+      run: |
+        if [ ! -f requirements.txt ]; then
+          echo "Error: requirements.txt file not found!"
+          exit 1
+        fi
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+    # Step 7: Set up Node.js environment
+    - name: Set Up Node.js Environment
+      uses: actions/setup-node@v3
+      with:
+        node-version: 18  # Use LTS version
+
+    # Step 8: Install AWS CDK globally
+    - name: Install AWS CDK Globally
+      run: npm install -g aws-cdk
+
+    # Step 9: Deploy the CDK stack using the config file
+    - name: Deploy AWS CDK Stack
+      run: |
+        echo "Starting CDK deployment..."
+        cdk deploy -c config="external-repo/${{ github.event.inputs.config-file }}" --require-approval=never
