@@ -82,4 +82,4 @@ jobs:
     - name: Destroy AWS CDK Stack
       run: |
         echo "Starting CDK destroy operation..."
-        cdk destroy -c config="parser/config/external-repo/${{ github.event.inputs.config-file }}" --require-approval=never
+        cdk destroy -c config="external-repo/${{ github.event.inputs.config-file }}" --require-approval=never
