@@ -14,7 +14,7 @@ const http = require("http");
 const AWS = require("aws-sdk");
 
 // Set AWS Region
-AWS.config.update({ region: "ap-south-1" }); // Adjust the region if needed
+AWS.config.update({ region: "us-east-1" }); // Adjust the region if needed
 
 // Initialize DynamoDB Document Client
 const dynamoDb = new AWS.DynamoDB.DocumentClient();
