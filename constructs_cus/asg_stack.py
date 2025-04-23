@@ -13,7 +13,7 @@ class ASGStack(Construct):
         self.name = config['name']
 
         current_directory = os.path.dirname(__file__)
-        user_data_path = os.path.join(current_directory, config.get('user_data_path', 'user_data.sh'))
+        user_data_path = os.path.join("..", "parser", "configs","external-repo",config.get('user_data_path', 'user_data.sh'))
 
         # Load User Data script
         user_data_content = ""
