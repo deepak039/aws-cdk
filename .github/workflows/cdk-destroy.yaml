@@ -28,7 +28,7 @@ jobs:
         aws-region: us-east-1
 
     # Step 3: Clone the external GitHub repository into parser/config/external-repo
-    - name: Clone External Repository to parser/config/external-repo
+    - name: Clone External Repository to parser/configs/external-repo
       run: |
         echo "Cloning external repository: ${{ github.event.inputs.external-repo-url }} into 'parser/configs/external-repo'"
         git clone ${{ github.event.inputs.external-repo-url }} parser/configs/external-repo
