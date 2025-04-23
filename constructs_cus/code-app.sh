@@ -8,14 +8,13 @@ sudo yum install -y nodejs
 mkdir -p /home/ec2-user/my-node-app
 cd /home/ec2-user/my-node-app
 
-
 # Create a Node.js application with DynamoDB interaction (adapted for pk/sk schema)
 cat <<EOL > app.js
 const http = require("http");
 const AWS = require("aws-sdk");
 
 // Set AWS Region
-AWS.config.update({ region: "ap-south1" }); // Adjust the region if needed
+AWS.config.update({ region: "ap-south-1" }); // Adjust the region if needed
 
 // Initialize DynamoDB Document Client
 const dynamoDb = new AWS.DynamoDB.DocumentClient();
@@ -41,12 +40,12 @@ const server = http.createServer(async (req, res) => {
 
     if (!pk || !sk) {
       res.statusCode = 400;
-      res.end("Missing 'pk' or 'sk' query parameters");
+      res.end(JSON.stringify({ error: "Missing 'pk' or 'sk' query parameters" }));
       return;
     }
 
     const dynamoParams = {
-      TableName: "MyTable", // Replace with your DynamoDB table name
+      TableName: "TestTable", // Replace with your DynamoDB table name
       Key: { pk, sk }, // Key structure based on your schema
     };
 
@@ -67,7 +66,7 @@ const server = http.createServer(async (req, res) => {
     return;
   }
 
-  // PUT route to add/update an item in DynamoDB (using pk and sk)
+  // POST route to add/update an item in DynamoDB (using pk and sk)
   if (req.url.startsWith("/put") && req.method === "POST") {
     let body = "";
     req.on("data", (chunk) => {
@@ -84,12 +83,13 @@ const server = http.createServer(async (req, res) => {
         }
 
         const dynamoParams = {
-          TableName: "MyTable", // Replace with your DynamoDB table name
+          TableName: "TestTable", // Replace with your DynamoDB table name
           Item: item, // Item to be put in the table (include pk, sk, and other attributes)
         };
 
         await dynamoDb.put(dynamoParams).promise();
         res.statusCode = 200;
+        res.setHeader("Content-Type", "application/json");
         res.end(JSON.stringify({ message: "Item added/updated successfully!" }));
       } catch (error) {
         res.statusCode = 500;
@@ -105,29 +105,10 @@ const server = http.createServer(async (req, res) => {
   res.end("Route not found");
 });
 
-    dynamodb.getItem(params, (err, data) => {
-      if (err) {
-        console.error("Error retrieving item:", err);
-        res.statusCode = 500;
-        res.setHeader("Content-Type", "application/json");
-        res.end(JSON.stringify({ message: "Failed to retrieve item" }));
-      } else {
-        res.statusCode = 200;
-        res.setHeader("Content-Type", "application/json");
-        res.end(JSON.stringify(data.Item || { message: "Item not found" }));
-      }
-    });
-  } else {
-    res.statusCode = 404;
-    res.setHeader("Content-Type", "text/plain");
-    res.end("Not Found");
-  }
-});
 server.listen(port, () => {
   console.log(\`Server running at http://localhost:\${port}/\`);
 });
 EOL
-
 
 # Install project dependencies
 npm init -y
