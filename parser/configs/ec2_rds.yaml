@@ -1,0 +1,82 @@
+vpcs:
+  - name: "main-vpc"
+    max_azs: 2
+
+security_groups:
+  - name: "sec-group-1"
+    service: "main-vpc"
+    ingress_rules:
+      - cidr: "10.0.0.0/16"
+        description: "Allow all traffic within VPC"
+        port: "3306"
+      - cidr: "10.0.0.0/16"
+        description: "Allow all traffic within VPC"
+        port: "ALL_TRAFFIC"
+    egress_rules: 
+      - cidr: "0.0.0.0/0"
+        description: "Allow all outbound traffic"
+        port: "ALL_TRAFFIC"
+
+iam_permissions :
+  - name : "rds_access"
+    policies: 
+        - action:
+            - rds-db:connect
+            - rds:DescribeDBInstances
+          resource: "*"
+
+
+
+
+rds:
+  - name: "TestRDSInstance1"
+    vpc: "main-vpc"
+    security_group: "sec-group-1"
+    engine: "mysql"       
+    database_name: "testdb"
+    master_username: "admin1"
+    master_password: "password123"
+
+asg:
+  - name: myasg
+    rds_instance: "TestRDSInstance1"
+    policy : 
+      - "rds_access"
+    vpc : 'main-vpc'
+    user_data_path : 'code_ec2.sh'
+    max: 3
+    min: 1 
+    
+
+alb:
+  - name: myalb
+    vpc : 'main-vpc'
+    asg: myasg
+
+  # - name: "TestRDSInstance2"
+  #   vpc: "main-vpc"
+  #   security_group: "sec-group-1"
+  #   engine: "postgres"          # mysql, postgres, maria_db, oracle-se2
+  #   database_name: "testdb2"
+  #   master_username: "deepak2"
+  #   master_password: "password123"
+  #   cloudwatch_logs_exports:
+  #     - postgresql
+  #     - upgrade
+  # - name: "TestRDSInstance3"
+  #   vpc: "main-vpc"
+  #   security_group: "sec-group-1"
+  #   engine: "maria_db"          # mysql, postgres, maria_db, oracle-se2
+  #   database_name: "testdb3"
+  #   master_username: "admin3"
+  #   master_password: "password123"
+  # - name: "TestRDSInstance4"
+  #   vpc: "main-vpc"
+  #   security_group: "sec-group-1"
+  #   instance_type: "m5.large"
+  #   engine: "oracle-se2"          # mysql, postgres, maria_db, oracle-se2
+  #   database_name: "testdb4"
+  #   master_username: "admin4"
+  #   master_password: "password123"
+  #   cloudwatch_logs_exports:
+    
