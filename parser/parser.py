@@ -88,7 +88,7 @@ class Parser(Stack):
         vpc=self.registry.get('vpcs', config['vpc'])
         permissions = self.registry.all()['iam_permissions']
         rds=self.registry.maybe_get('rds', config.get('rds_instance')) if 'rds_instance' in config else None  
-        print(rds)       
+        print(f"[DEBUG] Rds config for asg: {rds}")      
         asgg = ASGStack(scope = self,vpc = vpc.vpc,config = config,permissions = permissions,rds=rds)
         return asgg   
     
