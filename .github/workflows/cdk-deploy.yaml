@@ -1,4 +1,4 @@
-name: Deploy CDK Stack
+name: Deploy CDK Stack Using Github Repo
 
 on:
   workflow_dispatch:

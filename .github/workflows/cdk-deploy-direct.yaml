@@ -1,11 +1,15 @@
-name: Deploy CDK Stack
+name: Deploy AWS Stack using Yaml Directly
 
 on:
   workflow_dispatch:
     inputs:
+      external-repo-url:
+        description: 'URL of the external GitHub repository containing the config file (e.g., https://github.com/user/repo)'
+        required: true
       config-file-content:
         description: 'YAML configuration file content for the CDK deployment (e.g., inline string format)'
         required: true
+      
 
 jobs:
   deploy:
