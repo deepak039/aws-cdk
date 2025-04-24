@@ -5,7 +5,7 @@ from aws_cdk import (
 )
 from constructs import Construct
 from aws_cdk.lambda_layer_kubectl_v28 import KubectlV28Layer
-
+import yaml
 
 class EksStack(Construct):
     def __init__(self, scope: Construct, config: dict, vpc=None, **kwargs):
@@ -102,6 +102,7 @@ class EksStack(Construct):
             self.name,
             cluster_name=self.name,
             vpc=vpc,
+            # alb_controller= eks.AlbControllerOptions(version=eks.AlbControllerVersion.V2_4_1) if config.get("alb_controller", True) else None,
             vpc_subnets=[{"subnet_type": ec2.SubnetType.PRIVATE_WITH_EGRESS}],
             default_capacity=config.get("default_capacity", 2),
             default_capacity_instance=ec2.InstanceType(config.get("default_instance_type", "t3.medium")),
@@ -200,6 +201,28 @@ class EksStack(Construct):
             )
 
     def add_manifests(self, manifests):
-        """Adds Kubernetes manifests to the cluster."""
+        """Adds Kubernetes manifests to the cluster. Accepts manifest definitions as inline YAML/dict or file paths.
+        
+        Use case:
+        manifests:
+        - name: "namespace-apps"  # Manifest name
+          definition:             # Inline manifest definition
+            apiVersion: v1
+            kind: Namespace 
+            metadata:
+              name: "apps"
+        - name: "config-map"      # Manifest name 
+          file: "path/to/manifest.yaml"  # Load from file - accepts both absolute paths (e.g. /home/user/manifest.yaml) 
+                                        # and relative paths (e.g. ./manifests/manifest.yaml)
+        """
         for manifest in manifests:
-            self.cluster.add_manifest(manifest.get("name"), manifest.get("definition"))
+            if "file" in manifest:
+                # Load manifest from file - works with both absolute and relative paths
+                with open(manifest["file"], 'r') as f:
+                    manifest_def = yaml.safe_load(f)
+                self.cluster.add_manifest(manifest.get("name"), manifest_def)
+            elif "definition" in manifest:
+                # Use inline manifest definition
+                self.cluster.add_manifest(manifest.get("name"), manifest.get("definition"))
+            else:
+                raise ValueError("Manifest must contain either 'file' or 'definition' key")

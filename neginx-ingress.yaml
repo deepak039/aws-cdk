@@ -1,0 +1,22 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: nginx-ingress
+  annotations:
+   
+    kubernetes.io/ingress.class: "alb"                      # Use ALB Controller
+    alb.ingress.kubernetes.io/scheme: internet-facing       # 'internal' for private ALB
+    alb.ingress.kubernetes.io/target-type: ip               # Targets Pod IPs
+    alb.ingress.kubernetes.io/backend-protocol: HTTP        # Protocol between ALB and backends
+spec:
+  rules:
+    - host:   af861839133ce46029c8394b55a68fa6-912979286.ap-south-1.elb.amazonaws.com                   # Host-based routing (Optional)
+      http:
+        paths:
+          - path: /hello
+            pathType: Prefix
+            backend:
+              service:
+                name: nginx-service-node                       # Connect to the backend Service
+                port:
+                  number: 80
