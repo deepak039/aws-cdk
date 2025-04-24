@@ -1,4 +1,4 @@
-name: Destroy CDK Stack
+name: Destroy CDK Stack Using Github Repo
 
 on:
   workflow_dispatch:

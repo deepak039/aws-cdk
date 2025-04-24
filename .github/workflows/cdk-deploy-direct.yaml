@@ -1,4 +1,4 @@
-name: Deploy CDK Stack Using Github Repo
+name: Deploy AWS Stack using Yaml Directly
 
 on:
   workflow_dispatch:
@@ -6,9 +6,10 @@ on:
       external-repo-url:
         description: 'URL of the external GitHub repository containing the config file (e.g., https://github.com/user/repo)'
         required: true
-      config-file:
-        description: 'Filename of the YAML file for the CDK deployment (e.g., lambda.yaml)'
+      config-file-content:
+        description: 'YAML configuration file content for the CDK deployment (e.g., inline string format)'
         required: true
+      
 
 jobs:
   deploy:
@@ -52,6 +53,12 @@ jobs:
       env:
         CONFIG_FILE: /external-repo/${{ github.event.inputs.config-file }}
 
+    - name: Write Config File to parser/configs/
+      run: |
+        echo "${{ github.event.inputs.config-file-content }}" > parser/configs/config.yaml
+        echo "Generated config.yaml in parser/configs/:"
+        cat parser/configs/config.yaml
+
     # Step 5: Set up Python environment
     - name: Set Up Python Environment
       uses: actions/setup-python@v4
@@ -82,4 +89,4 @@ jobs:
     - name: Deploy AWS CDK Stack
       run: |
         echo "Starting CDK deployment..."
-        cdk deploy -c config="external-repo/${{ github.event.inputs.config-file }}" --require-approval=never
+        cdk deploy -c config="config.yaml" --require-approval=never
