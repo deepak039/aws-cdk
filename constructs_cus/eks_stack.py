@@ -218,7 +218,7 @@ class EksStack(Construct):
         for manifest in manifests:
             if "file" in manifest:
                 # Load manifest from file - works with both absolute and relative paths
-                with open(manifest["file"], 'r') as f:
+                with open(f'parser/configs/external-repo/{manifest["file"]}', 'r') as f:
                     manifest_def = yaml.safe_load(f)
                 self.cluster.add_manifest(manifest.get("name"), manifest_def)
             elif "definition" in manifest:
