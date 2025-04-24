@@ -102,7 +102,7 @@ class EksStack(Construct):
             self.name,
             cluster_name=self.name,
             vpc=vpc,
-            # alb_controller= eks.AlbControllerOptions(version=eks.AlbControllerVersion.V2_4_1) if config.get("alb_controller", True) else None,
+            alb_controller= eks.AlbControllerOptions(version=eks.AlbControllerVersion.V2_4_1) ,
             vpc_subnets=[{"subnet_type": ec2.SubnetType.PRIVATE_WITH_EGRESS}],
             default_capacity=config.get("default_capacity", 2),
             default_capacity_instance=ec2.InstanceType(config.get("default_instance_type", "t3.medium")),
@@ -218,7 +218,7 @@ class EksStack(Construct):
         for manifest in manifests:
             if "file" in manifest:
                 # Load manifest from file - works with both absolute and relative paths
-                with open(manifest["file"], 'r') as f:
+                with open(f'parser/configs/external-repo/{manifest["file"]}', 'r') as f:
                     manifest_def = yaml.safe_load(f)
                 self.cluster.add_manifest(manifest.get("name"), manifest_def)
             elif "definition" in manifest:

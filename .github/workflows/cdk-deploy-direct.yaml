@@ -36,22 +36,6 @@ jobs:
         echo "External repository cloned successfully"
         ls -la parser/configs/external-repo
 
-    # Step 4: Validate config file existence in external repository
-    - name: Validate Config File in External Repository
-      run: |
-        CONFIG_FILE="parser/configs/external-repo/${{ github.event.inputs.config-file }}"
-        echo "Constructed config file path: $CONFIG_FILE"
-        if [ -z "$CONFIG_FILE" ]; then
-          echo "Error: Config file input is required!"
-          exit 1
-        fi
-        if [ ! -f "$CONFIG_FILE" ]; then
-          echo "Error: Specified config file '$CONFIG_FILE' not found in the cloned external repository!"
-          exit 1
-        fi
-        echo "Config file '$CONFIG_FILE' found successfully!"
-      env:
-        CONFIG_FILE: /external-repo/${{ github.event.inputs.config-file }}
 
     - name: Write Config File to parser/configs/
       run: |

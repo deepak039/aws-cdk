@@ -87,8 +87,8 @@ class Parser(Stack):
         print(f"[DEBUG] Creating Auto Scaling Group with config: {config}")
         vpc=self.registry.get('vpcs', config['vpc'])
         permissions = self.registry.all()['iam_permissions']
-        rds=self.registry.maybe_get('rds', config.get('rds_instance')) if 'rds_instance' in config else None         
-        
+        rds=self.registry.maybe_get('rds', config.get('rds_instance')) if 'rds_instance' in config else None  
+        print(f"[DEBUG] Rds config for asg: {rds}")      
         asgg = ASGStack(scope = self,vpc = vpc.vpc,config = config,permissions = permissions,rds=rds)
         return asgg   
     
@@ -146,6 +146,9 @@ class Parser(Stack):
         res = {
             "db_instance": rds_stack.db_instance,
             "db_endpoint": rds_stack.db_endpoint,
+            "name" : config['database_name'],
+            "admin" : config['master_username'],
+            "password" : config['master_password'],
             "db_port": rds_stack.db_port,
         }
         self.registry.register('rds', config['name'], res)
