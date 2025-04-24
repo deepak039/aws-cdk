@@ -8,7 +8,7 @@ class ValidationChecker:
         "asg": ["name", "vpc", "user_data_path", "max", "min"],
         "dynamodb": ["name", "partition_key"],
         "ec2": ["name"],
-        "eks": ["name", "vpc", "admin_roles", "node_groups"],
+        "eks": ["name", "vpc", "admin_roles"],
         "elasticache": [],
         "iam_permissions": [],
         "lambdas": ["name", "runtime", "handler", "memory_size", "timeout"],
