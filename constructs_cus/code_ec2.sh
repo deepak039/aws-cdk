@@ -1,136 +1,158 @@
 #!/bin/bash
-# Update and install necessary packages
-sudo yum update -y
-sudo yum install -y python3 pip git
 
-# Install Flask and other Python dependencies
-pip3 install flask pymysql
+# Exit script if there are any errors
+set -e
 
-# Create application directory
-APP_DIR="/home/ec2-user/flaskapp"
+echo "==========================================="
+echo "⚙️  Starting Deployment Script for EC2..."
+echo "==========================================="
+
+# ---------------------------------------
+# Step 1: Update and Install Dependencies
+# ---------------------------------------
+echo "🔄 Updating system and installing dependencies..."
+sudo apt update -y
+sudo apt upgrade -y
+
+# Install Node.js (v18)
+echo "🔄 Installing Node.js (v18)..."
+curl -fsSL https://deb.nodesource.com/setup_18.x | sudo bash -
+sudo apt install -y nodejs
+
+# Install MySQL Client
+echo "🔄 Installing MySQL client..."
+sudo apt install -y mysql-client
+
+# Install PM2 (process manager for Node.js applications)
+echo "🔄 Installing PM2 (for process management)..."
+sudo npm install -g pm2
+
+# ------------------------------------------
+# Step 2: Validate Environment Variables
+# ------------------------------------------
+echo "🔍 Validating environment variables from /etc/environment..."
+
+if [ ! -f /etc/environment ]; then
+    echo "Error: User Data environment variables are not set!"
+    exit 1
+fi
+
+# Export variables into the current shell session (this is optional, depends on your app)
+export $(cat /etc/environment | xargs)
+
+echo "Environment variables loaded:"
+cat /etc/environment
+
+# --------------------------------------
+# Step 3: Copy Application Code to EC2
+# --------------------------------------
+echo "📂 Setting up application code..."
+APP_DIR="/home/ubuntu/app"
 sudo mkdir -p $APP_DIR
-cd $APP_DIR
 
-# Flask application code
-cat << EOF > app.py
-from flask import Flask, request, jsonify
-import pymysql
+# Replace this with the actual Node.js code (index.mjs)
+cat > $APP_DIR/index.mjs <<'EOL'
+import mysql from 'mysql2/promise';
+import express from 'express';
 
-app = Flask(__name__)
+const app = express();
+app.use(express.json());
 
-# Database configuration (replace placeholders with actual values)
-DB_HOST = "${db_host}"
-DB_PORT = int("${db_port}")
-DB_USER = "yourdbuser"
-DB_PASSWORD = "yourdbpassword"
-DB_NAME = "yourdbname"
+// Debugging function
+function debugEnvironment() {
+    console.log("DB_HOST:", process.env.DB_HOST);
+    console.log("DB_PORT:", process.env.DB_PORT);
+    console.log("DB_NAME:", process.env.DB_NAME);
+    console.log("DB_USERNAME:", process.env.DB_USERNAME);
+    console.log("DB_PASSWORD exists:", !!process.env.DB_PASSWORD);
+}
 
-# Database connection helper
-def get_db_connection():
-    return pymysql.connect(
-        host=DB_HOST,
-        port=DB_PORT,
-        user=DB_USER,
-        password=DB_PASSWORD,
-        database=DB_NAME
-    )
+// Function to connect to the database
+async function connectToDatabase() {
+    debugEnvironment();
 
-# Insert data into database
-@app.route('/insert', methods=['POST'])
-def insert_data():
-    try:
-        data = request.json
-        key = data.get("key")
-        value = data.get("value")
+    const connection = await mysql.createConnection({
+        host: process.env.DB_HOST,
+        user: process.env.DB_USERNAME,
+        password: process.env.DB_PASSWORD,
+        database: process.env.DB_NAME,
+        port: process.env.DB_PORT,
+    });
 
-        conn = get_db_connection()
-        cursor = conn.cursor()
+    console.log('Connected to RDS');
 
-        sql = "INSERT INTO my_table (key_column, value_column) VALUES (%s, %s)"
-        cursor.execute(sql, (key, value))
-        conn.commit()
-        cursor.close()
-        conn.close()
-
-        return jsonify({"status": "success", "message": f"Inserted key={key}, value={value}"})
-    except Exception as e:
-        return jsonify({"status": "error", "message": str(e)})
-
-# Retrieve data from database
-@app.route('/get', methods=['GET'])
-def get_data():
-    try:
-        key = request.args.get("key")
-
-        conn = get_db_connection()
-        cursor = conn.cursor()
-
-        sql = "SELECT value_column FROM my_table WHERE key_column = %s"
-        cursor.execute(sql, (key,))
-        result = cursor.fetchone()
-        cursor.close()
-        conn.close()
-
-        if result:
-            return jsonify({"status": "success", "key": key, "value": result[0]})
-        else:
-            return jsonify({"status": "error", "message": "Key not found."})
-    except Exception as e:
-        return jsonify({"status": "error", "message": str(e)})
-
-# Health check route
-@app.route('/health', methods=['GET'])
-def health_check():
-    return jsonify({"status": "healthy"})
-
-if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=8080)
-EOF
-
-# Set up the database schema
-cat << EOF > setup_db.py
-import pymysql
-
-DB_HOST = "${db_host}"
-DB_PORT = int("${db_port}")
-DB_USER = "admin1"
-DB_PASSWORD = "password123"
-DB_NAME = "testdb"
-
-def setup_database():
-    conn = pymysql.connect(
-        host=DB_HOST,
-        port=DB_PORT,
-        user=DB_USER,
-        password=DB_PASSWORD
-    )
-    cursor = conn.cursor()
-
-    # Create database
-    cursor.execute(f"CREATE DATABASE IF NOT EXISTS {DB_NAME}")
-    conn.commit()
-
-    # Connect to the newly created database
-    conn.select_db(DB_NAME)
-
-    # Create table
-    cursor.execute("""
-        CREATE TABLE IF NOT EXISTS my_table (
-            key_column VARCHAR(255) PRIMARY KEY,
-            value_column VARCHAR(255)
+    const createTableQuery = `
+        CREATE TABLE IF NOT EXISTS users (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            name VARCHAR(255) NOT NULL,
+            age INT NOT NULL
         )
-    """)
-    conn.commit()
+    `;
+    await connection.execute(createTableQuery);
+    console.log('Ensured "users" table exists');
 
-    cursor.close()
-    conn.close()
+    return connection;
+}
 
-if __name__ == "__main__":
-    setup_database()
-EOF
+app.post('/insert', async (req, res) => {
+    try {
+        const connection = await connectToDatabase();
+        const { name, age } = req.body;
 
-# Run database setup
-python3 setup_db.py
+        const query = 'INSERT INTO users (name, age) VALUES (?, ?)';
+        await connection.execute(query, [name, age]);
 
-# Launch Flask app
-nohup python3 app.py > app.log 2>&1 &
+        res.status(200).json({ message: "Inserted successfully!" });
+    } catch (error) {
+        console.error('Error:', error);
+        res.status(500).json({ message: 'Internal Server Error', error: error.message });
+    }
+});
+
+app.get('/retrieve', async (req, res) => {
+    try {
+        const connection = await connectToDatabase();
+        const query = 'SELECT * FROM users';
+        const [rows] = await connection.query(query);
+
+        res.status(200).json(rows);
+    } catch (error) {
+        console.error('Error:', error);
+        res.status(500).json({ message: 'Internal Server Error', error: error.message });
+    }
+});
+
+app.all('*', (req, res) => {
+    res.status(404).json({ message: "Route not found" });
+});
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
+});
+EOL
+
+echo "✔️ Application code copied to $APP_DIR/index.mjs"
+
+# ------------------------------------------
+# Step 4: Install Node.js Project Dependencies
+# ------------------------------------------
+cd $APP_DIR
+echo "{}" > package.json # Initialize package.json (if missing)
+echo "📦 Installing required Node.js dependencies..."
+npm install mysql2 express
+
+# ------------------------------------------
+# Step 5: Start the Application using PM2
+# ------------------------------------------
+echo "🚀 Starting application using PM2..."
+pm2 start $APP_DIR/index.mjs --name ec2-rds-app --env production
+
+# Save process state to restart EC2 instance
+pm2 startup
+pm2 save
+
+echo "==========================================="
+echo "🎉 Deployment complete! Your app is live!"
+echo "==========================================="
+echo "Access it at: http://<YOUR-EC2-PUBLIC-IP>:3000"

@@ -19,7 +19,6 @@ class ASGStack(Construct):
         user_data_path = os.path.join(base_path, "parser", "configs","external-repo",config.get('user_data_path', 'user_data.sh'))
 
         # Load User Data script
-        user_data_content = ""
         try:
             with open(user_data_path, 'r') as f:
                 user_data_content = f.read()
@@ -27,22 +26,26 @@ class ASGStack(Construct):
             print(f"Error: '{user_data_path}' file not found.")
 
         # Inject dynamic RDS database parameters
+        env_variables = {}
         if rds:
             rds_instance = rds
             print(f"[DEBUG] RDS instance found: {rds_instance.db_endpoint}, port: {rds_instance.db_port}")
+            
+            env_variables = {
+                "DB_HOST": rds_instance.db_endpoint,
+                "DB_PORT": rds_instance.db_port,
+                "DB_NAME": rds_instance.name,
+                "DB_USER": rds_instance.admin,
+                "DB_PASSWORD": rds_instance.password
+            }     
+            print(env_variables)          
 
-            endpoint = {
-                "db_host": rds_instance.db_endpoint,
-                "db_port": str(rds_instance.db_port),
-            }
-
-            # Replace placeholders in the user data content
-            user_data_content = user_data_content.replace("${db_host}", endpoint["db_host"])
-            user_data_content = user_data_content.replace("${db_port}", endpoint["db_port"])
-
-        # Create UserData object and populate it with commands
         user_data = ec2.UserData.for_linux()
-        user_data.add_commands(user_data_content)
+        for key, value in env_variables.items():
+    
+            user_data.add_commands(f'echo "export {key}={value}" >> /etc/environment')
+            user_data.add_commands("echo 'Environment Variables set:' && cat /etc/environment")
+
 
         # IAM Role for the Auto Scaling instances
         asg_role = iam.Role(
