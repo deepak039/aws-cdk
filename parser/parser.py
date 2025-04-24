@@ -110,8 +110,7 @@ class Parser(Stack):
         vpc=self.registry.get('vpcs',config['vpc'])
         sg=self.registry.get('security_groups', config['security_group'])
         permissions = self.registry.all()['iam_permissions']
-        rds=self.registry.maybe_get('rds', config['rds_instance']) 
-          
+        rds=self.registry.maybe_get('rds', config.get('rds_instance')) if 'rds_instance' in config else None           
         lambda_func = LambdaStack(scope = self,vpc = vpc.vpc,security_group = sg.sg,config = config,permissions = permissions,rds=rds)
         return lambda_func
         
