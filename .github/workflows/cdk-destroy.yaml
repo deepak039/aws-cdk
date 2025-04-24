@@ -28,17 +28,17 @@ jobs:
         aws-region: us-east-1
 
     # Step 3: Clone the external GitHub repository into parser/config/external-repo
-    - name: Clone External Repository to parser/config/external-repo
+    - name: Clone External Repository to parser/configs/external-repo
       run: |
-        echo "Cloning external repository: ${{ github.event.inputs.external-repo-url }} into 'parser/config/external-repo'"
-        git clone ${{ github.event.inputs.external-repo-url }} parser/config/external-repo
+        echo "Cloning external repository: ${{ github.event.inputs.external-repo-url }} into 'parser/configs/external-repo'"
+        git clone ${{ github.event.inputs.external-repo-url }} parser/configs/external-repo
         echo "External repository cloned successfully"
-        ls -la parser/config/external-repo
+        ls -la parser/configs/external-repo
 
     # Step 4: Validate config file existence in external repository
     - name: Validate Config File in Cloned Repository
       run: |
-        CONFIG_FILE="parser/config/external-repo/${{ github.event.inputs.config-file }}"
+        CONFIG_FILE="parser/configs/external-repo/${{ github.event.inputs.config-file }}"
         echo "Constructed config file path: $CONFIG_FILE"
         if [ -z "$CONFIG_FILE" ]; then
           echo "Error: Config file input is required!"
@@ -50,7 +50,7 @@ jobs:
         fi
         echo "Config file '$CONFIG_FILE' found successfully!"
       env:
-        CONFIG_FILE: parser/config/external-repo/${{ github.event.inputs.config-file }}
+        CONFIG_FILE: parser/configs/external-repo/${{ github.event.inputs.config-file }}
 
     # Step 5: Set up Python environment
     - name: Set Up Python Environment
@@ -82,4 +82,4 @@ jobs:
     - name: Destroy AWS CDK Stack
       run: |
         echo "Starting CDK destroy operation..."
-        cdk destroy -c config="parser/config/external-repo/${{ github.event.inputs.config-file }}" --require-approval=never
+        cdk destroy -c config="external-repo/${{ github.event.inputs.config-file }}" --force

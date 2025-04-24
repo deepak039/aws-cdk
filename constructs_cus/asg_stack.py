@@ -12,8 +12,11 @@ class ASGStack(Construct):
         super().__init__(scope, config['name'], **kwargs)
         self.name = config['name']
 
-        current_directory = os.path.dirname(__file__)
-        user_data_path = os.path.join(current_directory, config.get('user_data_path', 'user_data.sh'))
+        current_directory = os.path.dirname(os.path.abspath(__file__))
+
+        # Traverse up to the parent directory to get the base path of awscdk
+        base_path = os.path.abspath(os.path.join(current_directory, ".."))
+        user_data_path = os.path.join(base_path, "parser", "configs","external-repo",config.get('user_data_path', 'user_data.sh'))
 
         # Load User Data script
         user_data_content = ""
