@@ -82,4 +82,5 @@ jobs:
     - name: Deploy AWS CDK Stack
       run: |
         echo "Starting CDK deployment..."
+        cdk bootstrap
         cdk deploy -c config="external-repo/${{ github.event.inputs.config-file }}" --require-approval=never
