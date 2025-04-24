@@ -22,6 +22,14 @@ eks:
     #     min_size: 1
     #     max_size: 3
     #     desired_size: 2
+    manifests:
+        - name: "namespace"      # Manifest name 
+          file: "manifest/namespace.yaml"
+        - name: "neginx"       
+          file: "manifest/deployment.yaml"
+        - name: "nginx-service"    
+          file: "manifest/service1.yaml"
+    
 
        
 
