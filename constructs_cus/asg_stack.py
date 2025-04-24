@@ -38,7 +38,7 @@ class ASGStack(Construct):
                 "DB_USER": rds_instance.admin,
                 "DB_PASSWORD": rds_instance.password
             }     
-            print(env_variables)          
+            print("print : ",env_variables)          
 
         user_data = ec2.UserData.for_linux()
         for key, value in env_variables.items():
